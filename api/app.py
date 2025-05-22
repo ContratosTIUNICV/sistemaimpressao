@@ -299,5 +299,8 @@ def logout():
 def handler(request, context=None):
     return app(request.environ, start_response=context)
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+if __name__ == "__main__":
+    from os import getenv
+    port = int(getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
