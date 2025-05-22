@@ -8,7 +8,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "public.login.html"
+      "dest": "api/index.py"
     }
   ]
 }
