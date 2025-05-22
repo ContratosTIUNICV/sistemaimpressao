@@ -15,7 +15,7 @@ body {
     background-color: white;
     padding: 30px 40px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 350px;
 }
 
@@ -26,7 +26,8 @@ label {
     color: #333;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"],
+input[type="password"] {
     width: 100%;
     padding: 10px 12px;
     margin-bottom: 18px;
@@ -57,4 +58,8 @@ button:hover {
     margin-top: 10px;
     font-weight: 600;
     text-align: center;
+}
+
+form button+button {
+    margin-top: 10px;
 }

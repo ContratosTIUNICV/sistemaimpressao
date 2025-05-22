@@ -2,28 +2,63 @@
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <title>Login</title>
+    <style>
+        .toast {
+            position: fixed;
+            top: 20px;
+            /* no topo da tela */
+            left: 50%;
+            /* centralizado horizontalmente */
+            transform: translateX(-50%);
+            background-color: #f44336;
+            /* vermelho */
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 1;
+            animation: fadeout 0.5s ease-in-out 2.5s forwards;
+        }
+
+        @keyframes fadeout {
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+                visibility: hidden;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
         <form method="POST">
             <label for="cpf">CPF:</label>
-            <input type="text" id="cpf" name="cpf" value=""><br><br>
+            <input type="text" id="cpf" name="cpf" /><br /><br />
 
             <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" value=""><br><br>
+            <input type="password" id="senha" name="senha" /><br /><br />
 
             <button type="submit">Entrar</button>
+            <button type="button" id="cadastroBtn" data-url="{{ url_for('cadastro') }}">Cadastrar</button>
 
-            {% if error_message %}
-            <p class="error-message">{{ error_message }}</p>
-            {% endif %}
+            <script>
+                document.getElementById("cadastroBtn").addEventListener("click", function () {
+                    window.location.href = this.getAttribute("data-url");
+                });
+            </script>
+
         </form>
     </div>
+
+    {% if error_message %}
+    <div class="toast">{{ error_message }}</div>
+    {% endif %}
 </body>
 
 </html>
