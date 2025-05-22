@@ -4,8 +4,8 @@ from functools import wraps
 import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
-import uuid
 from flask import send_from_directory
+import bcrypt
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta'  # altere para algo seguro
 
@@ -26,11 +26,11 @@ def login():
         cpf_input = request.form['cpf']
         senha_input = request.form['senha']
 
-        # Tenta buscar o usuário
-        result = supabase.table("usuario").select("*").eq("cpf", cpf_input).single().execute()
+        # Busca o usuário sem usar .single(), para evitar erro se não encontrar
+        result = supabase.table("usuario").select("*").eq("cpf", cpf_input).execute()
 
-        if result.data:
-            usuario = result.data
+        if result.data and len(result.data) == 1:
+            usuario = result.data[0]
             if usuario['senha'] == senha_input:
                 session['logged_in'] = True
                 session['usuario'] = cpf_input
@@ -45,39 +45,20 @@ def login():
 
     error_message = session.get('error_message', None)
     return render_template('login.html', error_message=error_message)
-
-
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     pre_cadastro = session.get('pre_cadastro', None)
-
     if request.method == 'POST':
-        nome = request.form['nome']
-        ra = request.form['ra']
         cpf = pre_cadastro['cpf']
         senha = pre_cadastro['senha']
+        nome = request.form['nome']
 
-        # Verifica se RA já existe
-        existing = supabase.table("aluno").select("id").eq("ra", ra).execute()
-        if existing.data:
-            erro = f"O RA {ra} já está cadastrado."
-            return render_template('cadastro.html', result='erro', erro=erro)
+        senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        # Cria aluno
-        aluno_response = supabase.table("aluno").insert({
-            "id": str(uuid.uuid4()),
-            "nome": nome,
-            "ra": ra
-        }).execute()
-
-        aluno_id = aluno_response.data[0]['id']
-
-        # Cria usuário vinculado ao aluno
-        supabase.table("tb_usuario").insert({
-            "id": str(uuid.uuid4()),
-            "cpf": cpf,
-            "senha": senha,
-            "id_aluno": aluno_id
+        supabase.table("usuario").insert({
+         "cpf": cpf,
+        "senha": senha_hash,
+        "nome": nome  # se a tabela tiver coluna nome
         }).execute()
 
         session['logged_in'] = True
@@ -87,10 +68,11 @@ def cadastro():
     return render_template('cadastro.html', pre_cadastro=pre_cadastro)
 @app.route('/')
 def home():
-    error_message = session.get('error_message', None)
-    login_data = session.get('login_data', {'login': '', 'senha': ''})
-    return render_template("login.html", error_message=error_message, login_data=login_data)
-# importante: para Vercel funcionar com Flask, você precisa isso:
+    return redirect(url_for('login'))
+@app.route('/logout')
+def logout():
+    session.clear()  # limpa a sessão
+    return redirect(url_for('login'))
 def handler(request, context=None):
     return app(request.environ, start_response=context)
 

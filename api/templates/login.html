@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{{ url_for('imagens', filename='512x512.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <title>Login</title>
 </head>
+
 <body>
     <div class="container">
-        <img src="{{ url_for('imagens', filename='logo-verde-280X100.png') }}" alt="Logo Verde">
         <form method="POST">
-            <label for="login">Login:</label>
-            <input type="text" id="login" name="login" value="{{ login_data.get('login', '') }}"><br><br>
+            <label for="cpf">CPF:</label>
+            <input type="text" id="cpf" name="cpf" value=""><br><br>
 
             <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" value="{{ login_data.get('senha', '') }}"><br><br>
+            <input type="password" id="senha" name="senha" value=""><br><br>
 
             <button type="submit">Entrar</button>
 
@@ -25,4 +25,5 @@
         </form>
     </div>
 </body>
+
 </html>

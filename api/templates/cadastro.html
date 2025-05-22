@@ -1,54 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{{ url_for('imagens', filename='512x512.png') }}">
-    <title>Cadastro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Cadastro de Usuário</title>
 </head>
 
 <body>
-    <a href="{{ url_for('logout') }}">
-        <button class="logout-btn">Logout</button>
-    </a>
-    <div class="usuario-logado">
-        <p>{{ session['usuario'] }}</p>
-    </div>
-    <div class="nav-buttons">
-        <button type="button" onclick="window.location.href='/consulta'">Consultar Aluno</button>
-        <button type="button" onclick="window.location.href='/cadastro'">Cadastrar Aluno</button>
-        <button type="button" onclick="window.location.href='/recarga'">Efetuar Recarga</button>
-        <button type="button" onclick="window.location.href='/debito'">Debitar Saldo</button>
-    </div>
+
     <div class="container">
-        <h1>Cadastro de Aluno</h1>
+        <h1>Cadastro de Usuário</h1>
         <form method="POST">
             <label for="nome">Nome:</label>
             <input type="text" id="nome" name="nome" placeholder="Digite seu nome" required>
 
-            <label for="ra">RA:</label>
-            <input type="number" id="ra" name="ra" placeholder="Digite seu RA" required>
+            <label for="cpf">CPF:</label>
+            <input type="text" id="cpf" name="cpf" value="{{ pre_cadastro['cpf'] if pre_cadastro else '' }}" readonly>
+
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" value="{{ pre_cadastro['senha'] if pre_cadastro else '' }}" readonly>
 
             <button type="submit">Cadastrar</button>
         </form>
 
-        {% if result == 'erro' %}
+        {% if erro %}
         <div class="error">
-            <p>{{erro}} Deseja fazer uma recarga?</p>
-            <button type="button" onclick="window.location.href='/cadastro'">Não</button>
-            <button type="button" onclick="window.location.href='/recarga'">Sim</button>
+            <p>{{ erro }}</p>
         </div>
         {% endif %}
-        {% if result == 'sucess_message' %}
-        <div class="sucess">
-            <p>{{ sucess_message }} Deseja fazer uma recarga para este usuário?</p>
-            <button type="button" onclick="window.location.href='/cadastro'">Não</button>
-            <button type="button" onclick="window.location.href='/recarga'">Sim</button>
-        </div>
-        {% endif %}
-
     </div>
+
 </body>
 
 </html>
