@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('imagens', filename='512x512.png') }}">
+    <title>Debito</title>
+</head>
+
+<body>
+    <a href="{{ url_for('logout') }}">
+        <button class="logout-btn">Logout</button>
+    </a>
+    <div class="usuario-logado">
+        <p>{{ session['usuario'] }}</p>
+    </div>
+    <div class="nav-buttons">
+        <button type="button" onclick="window.location.href='/consulta'">Consultar Aluno</button>
+        <button type="button" onclick="window.location.href='/cadastro'">Cadastrar Aluno</button>
+        <button type="button" onclick="window.location.href='/recarga'">Efetuar Recarga</button>
+        <button type="button" onclick="window.location.href='/debito'">Debitar Saldo</button>
+    </div>
+    <div class="container">
+        <h1>Debito de Saldo</h1>
+        <form method="POST">
+            <label for="ra">RA:</label>
+            <input type="number" id="ra" name="ra" placeholder="Digite o RA do aluno" required>
+
+            <label for="valor">Valor:</label>
+            <input type="text" id="valor" name="valor" placeholder="Digite o valor da recarga" required>
+
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="descricao" placeholder="Digite uma descrição (opcional)">
+
+            <button type="submit">Efetuar Debito</button>
+        </form>
+
+        {% if result %}
+        <div class="result">{{ result }}</div>
+        {% endif %}
+
+        {% if redirect_to_cadastro %}
+        <div class="error">
+            <p>RA não encontrado. <a href="{{ url_for('cadastro') }}">Cadastrar um novo aluno</a>?</p>
+        </div>
+        {% endif %}
+
+        {% if saldo_insuficiente %}
+        <div class="error">
+            <p>Saldo insuficiente para débito. Deseja realizar uma recarga?</p>
+            <button type="button" onclick="window.location.href='/debito'">Não</button>
+            <button type="button" onclick="window.location.href='/recarga'">Sim</button>
+        </div>
+        {% endif %}
+
+    </div>
+</body>
+
+</html>
