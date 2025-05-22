@@ -167,13 +167,10 @@ def cadastro():
 
     return render_template('cadastro.html', pre_cadastro=pre_cadastro)
 @app.route('/')
-def index():
-    return "API funcionando no Vercel com Flask + Supabase!"
+def home():
+    return render_template("login.html")
 
 # importante: para Vercel funcionar com Flask, você precisa isso:
 def handler(request, context=None):
     return app(request.environ, start_response=context)
 
-# importante: para Vercel funcionar com Flask, você precisa isso:
-def handler(request, context=None):
-    return app(request.environ, start_response=context)
