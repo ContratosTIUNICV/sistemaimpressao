@@ -12,14 +12,15 @@
         <img src="{{ url_for('imagens', filename='logo-verde-280X100.png') }}" alt="Logo Verde">
         <form method="POST">
             <label for="login">Login:</label>
-            <input type="text" id="login" name="login" value="{{ login_data['login'] }}" required><br><br>
+            <input type="text" id="login" name="login" value="{{ login_data.get('login', '') }}"><br><br>
 
             <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" value="{{ login_data['senha'] }}" required><br><br>
+            <input type="password" id="senha" name="senha" value="{{ login_data.get('senha', '') }}"><br><br>
 
             <button type="submit">Entrar</button>
+
             {% if error_message %}
-            <p style="color: red;">{{ error_message }}</p>
+            <p class="error-message">{{ error_message }}</p>
             {% endif %}
         </form>
     </div>
