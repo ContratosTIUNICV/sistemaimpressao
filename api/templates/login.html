@@ -45,14 +45,7 @@
             <input type="password" id="senha" name="senha" /><br /><br />
 
             <button type="submit">Entrar</button>
-            <button type="button" id="cadastroBtn" data-url="{{ url_for('cadastro') }}">Cadastrar</button>
-
-            <script>
-                document.getElementById("cadastroBtn").addEventListener("click", function () {
-                    window.location.href = this.getAttribute("data-url");
-                });
-            </script>
-
+            <button type="button" onclick="window.location.href='/cadastro'">Cadastrar</button>
         </form>
     </div>
 

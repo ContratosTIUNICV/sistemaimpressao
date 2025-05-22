@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <title>Bem-vindo</title>
+</head>
+<body>
+    <h1>Bem-vindo, {{ usuario.nome }}!</h1>
+
+    <p><strong>CPF:</strong> {{ usuario.cpf }}</p>
+    <p><strong>Email:</strong> {{ usuario.email }}</p>
+    <p><strong>Saldo:</strong> R$ {{ "%.2f"|format(usuario.saldo) }}</p>
+
+    <a href="{{ url_for('logout') }}">Sair</a>
+</body>
+</html>
