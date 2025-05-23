@@ -1,24 +1,124 @@
-/* static/style.css */
+:root {
+    --cor-primaria: #22c55e;
+    --cor-secundaria: #16a34a;
+    --cor-sucesso: #22c55e;
+    --cor-sucesso-hover: #16a34a;
+    --cor-fundo: #f9fafb;
+    --cor-texto: #111827;
+    --cor-borda: #e5e7eb;
+}
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
+    background-color: var(--cor-fundo);
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    color: var(--cor-texto);
 }
 
 .container {
-    background-color: white;
-    padding: 30px 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 350px;
+    max-width: 480px;
+    margin: 60px auto;
+    padding: 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    text-align: center;
 }
 
+h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.usuario-logado p {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 16px 0;
+}
+
+/* Estilo exclusivo do botão de logout */
+.logout-btn {
+    color: white;
+    background-color: red;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s ease-in-out;
+    z-index: 1000;
+}
+
+.logout-btn:hover {
+    background-color: #cc0000;
+}
+
+.nav-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.nav-buttons form {
+    margin: 0;
+}
+
+/* Estilo dos botões dentro de formulários e navegação */
+.nav-buttons button,
+form button {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 15px;
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.nav-buttons button:hover,
+form button:hover {
+    background-color: var(--cor-secundaria);
+}
+
+.result,
+.error {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.result {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.perfil-container {
+    background-color: #f3f4f6;
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.perfil-container p {
+    margin: 6px 0;
+    font-weight: 600;
+}
+
+/* Campos de formulário e página de login */
 label {
     display: block;
     margin-bottom: 8px;
@@ -37,22 +137,6 @@ input[type="password"] {
     font-size: 14px;
 }
 
-button {
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 0;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
 .error-message {
     color: #e74c3c;
     margin-top: 10px;
@@ -62,4 +146,119 @@ button:hover {
 
 form button+button {
     margin-top: 10px;
+}
+
+.admin .logout-btn,
+.admin .logout-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #dc3545;
+    /* vermelho */
+    color: white;
+    width: fit-content;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    border: none;
+    transition: background-color 0.3s ease;
+    margin: 0 auto;
+    display: block;
+    z-index: 1000;
+}
+
+.admin .logout-btn:hover,
+.admin .logout-button:hover {
+    background-color: #c82333;
+}
+
+.admin .nav-buttons button,
+.admin .button-group a {
+    background-color: #22c55e;
+    color: white;
+    border-radius: 8px;
+    font-size: 1.1em;
+    padding: 15px 20px;
+    width: 100%;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+}
+
+.admin .nav-buttons button:hover,
+.admin .button-group a:hover {
+    background-color: var(--cor-secundaria);
+}
+
+/* Se você quiser aumentar a largura da container só na admin: */
+.admin body,
+.admin {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15%;
+}
+
+.admin .container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.admin h1 {
+    text-align: center;
+    color: #333;
+}
+
+.admin .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.admin .button-group a {
+    display: block;
+    padding: 15px 20px;
+    background-color: #22c55e;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    width: 50%;
+    margin-left: auto;  
+    margin-right: auto;
+}
+
+.admin .button-group a:hover {
+    background-color: #16a34a;
+    /* Verde escuro */
+}
+
+.admin .logout-button {
+    display: block;
+    margin-top: 30px;
+    padding: 10px 15px;
+    background-color: #dc3545;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+}
+
+.admin .logout-button:hover {
+    background-color: #c82333;
 }

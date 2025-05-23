@@ -7,14 +7,11 @@ from dotenv import load_dotenv
 from flask import send_from_directory
 import bcrypt
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta'  # altere para algo seguro
 
+app.secret_key = 'sua_chave_secreta' 
 load_dotenv()
-# Recupera as variáveis de ambiente
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_KEY")
-
-# Cria o cliente do Supabase
 supabase: Client = create_client(url, key)
 
 @app.route('/imagens/<path:filename>')
@@ -63,25 +60,17 @@ def login():
             usuario = result.data[0]
             stored_senha_hash_str = usuario['senha']
             is_aluno = usuario.get('aluno', True)
-
-            # --- DEBUG PRINTS START ---
             print(f"DEBUG: Senha hash recuperada do Supabase (string): '{stored_senha_hash_str}'")
             print(f"DEBUG: Tipo da senha hash recuperada: {type(stored_senha_hash_str)}")
             print(f"DEBUG: Comprimento da senha hash recuperada: {len(stored_senha_hash_str) if stored_senha_hash_str else 'None'}")
-            # --- DEBUG PRINTS END ---
-
             try:
                 senha_hash_bytes = stored_senha_hash_str.encode('utf-8')
             except AttributeError:
                 error_message = 'Erro interno: formato da senha inválido.'
                 print("ERROR: stored_senha_hash_str não é uma string válida ou é None ao tentar encode.")
                 return render_template('login.html', error_message=error_message)
-
-            # --- DEBUG PRINTS START ---
             print(f"DEBUG: Senha hash após encode para bytes: '{senha_hash_bytes}'")
             print(f"DEBUG: Tipo da senha hash após encode: {type(senha_hash_bytes)}")
-            # --- DEBUG PRINTS END ---
-
             if bcrypt.checkpw(senha_input.encode('utf-8'), senha_hash_bytes):
                 session['logged_in'] = True
                 session['usuario'] = cpf_input
@@ -120,12 +109,8 @@ def cadastro():
                 return render_template('cadastro.html', error_message=error_message)
 
             senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-            # --- DEBUG PRINTS START ---
             print(f"DEBUG: Senha hash gerada para inserção: '{senha_hash}'")
             print(f"DEBUG: Tipo da senha hash gerada: {type(senha_hash)}")
-            # --- DEBUG PRINTS END ---
-
             supabase.table("usuario").insert({
                "cpf": cpf,
                "senha": senha_hash,
@@ -163,7 +148,11 @@ def inicio():
         return redirect(url_for('login'))
 
     try:
-        result = supabase.table("usuario").select("nome, cpf, saldo").eq("cpf", cpf_usuario).limit(1).execute()
+        result = supabase.table("usuario") \
+                         .select("nome, cpf, saldo") \
+                         .eq("cpf", cpf_usuario) \
+                         .limit(1) \
+                         .execute()
 
         if result.data and len(result.data) == 1:
             usuario_data = result.data[0]
@@ -171,10 +160,16 @@ def inicio():
         else:
             session.clear()
             return redirect(url_for('login'))
+
     except Exception as e:
         print(f"ERROR - Inicio: Erro ao buscar dados do usuário: {e}")
         session.clear()
         return redirect(url_for('login'))
+
+    # Verifica se o usuário clicou em "Visualizar Perfil"
+    acao = request.args.get("acao")
+    if acao == "perfil":
+        return render_template("perfil.html", usuario=usuario_data)
 
     return render_template('inicio.html', usuario=usuario_data)
 

@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8" />
-    <title>Bem-vindo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Recarga de Saldo</title>
 </head>
+
 <body>
-    <h1>Bem-vindo, {{ usuario.nome }}!</h1>
+    <div class="container">
+        <a href="{{ url_for('logout') }}" class="logout-link">
+            <button class="logout-btn">Logout</button>
+        </a>
 
-    <p><strong>CPF:</strong> {{ usuario.cpf }}</p>
-    <p><strong>Email:</strong> {{ usuario.email }}</p>
-    <p><strong>Saldo:</strong> R$ {{ "%.2f"|format(usuario.saldo) }}</p>
+        <div class="usuario-logado">
+            <p>Olá, {{ usuario.nome }}!</p>
+        </div>
 
-    <a href="{{ url_for('logout') }}">Sair</a>
+        <div class="nav-buttons">
+            <form method="get">
+                <button type="submit" name="acao" value="perfil">Visualizar Perfil</button>
+            </form>
+            <form method="get">
+                <button type="submit" name="acao" value="recarregar">Recarregar</button>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
