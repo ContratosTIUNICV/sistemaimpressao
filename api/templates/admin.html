@@ -11,7 +11,7 @@
 <body class="admin">
     <div class="container">
         <h1>Bem-vindo, {{ session.get('usuario') }}!</h1>
-=        <div class="button-group">
+            <div class="button-group">
             <a href="{{ url_for('consulta_aluno') }}">Consultar Alunos</a>
             <a href="{{ url_for('debitar_aluno') }}">Debitar Saldo de Aluno</a>
         </div>
