@@ -8,17 +8,18 @@
     <title>Painel Administrativo</title>
 </head>
 
-<body class="admin">
-    <div class="admin-header">
+<body>
+    <div class="container admin-dashboard">
+        <a href="{{ url_for('logout') }}" class="logout-link">
+            <button class="logout-btn">Sair</button>
+        </a>
         <h1>Seja muito bem vindo, {{ session.get('usuario') }}!</h1>
-    </div>
-    <div class="principal">
-        <div class="admin-container">
-            <div class="button-group">
-                <a href="{{ url_for('consulta_aluno') }}">Consultar Alunos</a>
-                <a href="{{ url_for('debitar_aluno') }}">Debitar Saldo de Aluno</a>
-            </div>
-            <a href="{{ url_for('logout') }}" class="logout-button">Sair</a>
+
+        <div class="button-group">
+            <a href="{{ url_for('consulta_aluno') }}">Consultar Alunos</a>
+            <a href="{{ url_for('debitar_aluno') }}">Debitar Saldo de Aluno</a>
         </div>
     </div>
 </body>
+
+</html>

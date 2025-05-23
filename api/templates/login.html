@@ -6,52 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <title>Login</title>
-    <style>
-        .toast {
-            position: fixed;
-            top: 20px;
-            /* no topo da tela */
-            left: 50%;
-            /* centralizado horizontalmente */
-            transform: translateX(-50%);
-            background-color: #f44336;
-            /* vermelho */
-            color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            opacity: 1;
-            animation: fadeout 0.5s ease-in-out 2.5s forwards;
-        }
-
-        @keyframes fadeout {
-            to {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-                visibility: hidden;
-            }
-        }
-    </style>
-</head>
+    </head>
 
 <body>
     <div class="container">
+        <h1>Login</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast {{ category }}">{{ message }}</div> {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <form method="POST">
             <label for="cpf">CPF:</label>
-            <input type="text" id="cpf" name="cpf" /><br /><br />
+            <input type="text" id="cpf" name="cpf" required /><br />
 
             <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" /><br /><br />
+            <input type="password" id="senha" name="senha" required /><br />
 
             <button type="submit">Entrar</button>
             <button type="button" onclick="window.location.href='/cadastro'">Cadastrar</button>
         </form>
     </div>
-
-    {% if error_message %}
-    <div class="toast">{{ error_message }}</div>
-    {% endif %}
 </body>
 
 </html>

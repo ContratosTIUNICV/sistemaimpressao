@@ -1,379 +1,252 @@
+/* style.css */
+
 :root {
-    --cor-primaria: #22c55e;
-    --cor-secundaria: #16a34a;
-    --cor-sucesso: #22c55e;
-    --cor-sucesso-hover: #16a34a;
-    --cor-fundo: #f9fafb;
-    --cor-texto: #111827;
-    --cor-borda: #e5e7eb;
+    /* Cores baseadas no verde */
+    --primary-color: #28a745; /* Verde principal para botões e cabeçalhos */
+    --primary-dark: #218838;  /* Verde mais escuro para hover */
+    --secondary-color: #d4edda; /* Verde claro para backgrounds de sucesso */
+    --text-color: #333;       /* Cor de texto padrão */
+    --light-bg: #f4f4f4;      /* Fundo claro para o corpo */
+    --white-bg: #fff;         /* Fundo branco para containers */
+    --border-color: #ddd;     /* Cor de borda leve */
+    --error-color: #dc3545;   /* Vermelho para erros */
+    --error-bg: #f8d7da;      /* Fundo de erro */
+    --info-color: #007bff;    /* Azul para info */
+    --info-bg: #cce5ff;       /* Fundo de info */
+    --warning-color: #ffc107; /* Amarelo para warning */
+    --warning-bg: #fff3cd;    /* Fundo de warning */
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: var(--cor-fundo);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    color: var(--cor-texto);
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;     /* Centraliza verticalmente */
+    min-height: 100vh;       /* Garante que o corpo ocupa toda a altura da viewport */
+    box-sizing: border-box;
+    font-size: larger;
 }
 
 .container {
-    max-width: 480px;
-    margin: 60px auto;
-    padding: 24px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    text-align: center;
+    background-color: var(--white-bg);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 70%; /* Largura máxima para centralizar o conteúdo */
+    margin: 20px; /* Margem para telas menores */
+    box-sizing: border-box;
+    position: relative; /* Para posicionar o botão de logout */
+}
+
+.admin-dashboard .container {
+    max-width: 800px; /* Maior largura para o painel admin */
 }
 
 h1 {
-    font-size: 24px;
-    margin-bottom: 16px;
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-size: 2em;
 }
 
-.usuario-logado p {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 16px 0;
-}
-
-/* Estilo exclusivo do botão de logout */
-.logout-btn {
-    color: white;
-    background-color: red;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: background 0.2s ease-in-out;
-    z-index: 1000;
-}
-
-.logout-btn:hover {
-    background-color: #cc0000;
-}
-
-.nav-buttons {
+/* Formulários e Inputs */
+form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 15px; /* Espaço entre os elementos do formulário */
 }
 
-.nav-buttons form {
-    margin: 0;
-}
-
-/* Estilo dos botões dentro de formulários e navegação */
-.nav-buttons button,
-form button {
-    width: 100%;
-    padding: 10px 0;
-    font-size: 15px;
-    background-color: var(--cor-primaria);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease-in-out;
-}
-
-.nav-buttons button:hover,
-form button:hover {
-    background-color: var(--cor-secundaria);
-}
-
-.result,
-.error {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.result {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.error {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.perfil-container {
-    background-color: #f3f4f6;
-    padding: 16px;
-    border-radius: 8px;
-    margin-top: 20px;
-    text-align: left;
-}
-
-.perfil-container p {
-    margin: 6px 0;
-    font-weight: 600;
-}
-
-/* Campos de formulário e página de login */
 label {
-    display: block;
-    margin-bottom: 8px;
     font-weight: bold;
-    color: #333;
+    color: var(--text-color);
 }
 
 input[type="text"],
-input[type="password"] {
-    width: 100%;
-    padding: 10px 12px;
-    margin-bottom: 18px;
-    border: 1px solid #ccc;
+input[type="password"],
+input[type="number"],
+input[type="email"] { /* Adicione email se for usar */
+    width: calc(100% - 20px); /* Ajusta a largura considerando o padding */
+    padding: 10px;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 14px;
+    font-size: 1em;
+    box-sizing: border-box; /* Inclui padding e borda na largura */
 }
 
-.error-message {
-    color: #e74c3c;
-    margin-top: 10px;
-    font-weight: 600;
-    text-align: center;
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
 }
 
-form button+button {
-    margin-top: 10px;
-}
-
-.admin .logout-btn,
-.admin .logout-button {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #dc3545;
-    /* vermelho */
+/* Botões Gerais */
+button, .button-group a {
+    background-color: var(--primary-color);
     color: white;
-    width: fit-content;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
+    padding: 12px 20px;
     border: none;
-    transition: background-color 0.3s ease;
-    margin: 0 auto;
-    display: block;
-    z-index: 1000;
-}
-
-.admin .logout-btn:hover,
-.admin .logout-button:hover {
-    background-color: #c82333;
-}
-
-.admin .nav-buttons button,
-.admin .button-group a {
-    background-color: #22c55e;
-    color: white;
-    border-radius: 8px;
+    border-radius: 5px;
+    cursor: pointer;
     font-size: 1.1em;
-    padding: 15px 20px;
-    width: 100%;
-    cursor: pointer;
-    border: none;
     transition: background-color 0.3s ease;
-    text-decoration: none;
-    display: block;
+    text-decoration: none; /* Para links agindo como botões */
+    display: inline-block; /* Para links em grupo de botões */
     text-align: center;
+    box-sizing: border-box;
 }
 
-.admin .nav-buttons button:hover,
-.admin .button-group a:hover {
-    background-color: var(--cor-secundaria);
+button:hover, .button-group a:hover {
+    background-color: var(--primary-dark);
 }
 
-/* Se você quiser aumentar a largura da container só na admin: */
-.admin {
-    display: block;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: var(--cor-fundo);
+/* Botões Específicos */
+button[type="submit"] {
+    margin-top: 15px;
 }
 
-
-.admin-header {
-    text-align: center;
-    margin-top: 12vh;
-    margin-bottom: 30px;
-}
-
-.admin-header h1 {
-    font-size: 2rem;
-
-    color: #60925b;
-    text-decoration: underline;
-}
-
-.principal {
-    border-radius: 10px;
-    background-color: #e7eeec;
-    width: 50%;
-    max-width: 900px;
-    min-height: 30vh;
-    padding: 40px;
-    margin: 0 auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.admin-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.admin .button-group {
+.button-group {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Botões um abaixo do outro por padrão */
     gap: 10px;
     margin-top: 20px;
 }
 
-.admin .button-group a {
-    display: block;
-    padding: 15px 20px;
-    background-color: #22c55e;
-    color: white;
-    text-align: center;
-    text-decoration: none;
+@media (min-width: 600px) {
+    .button-group {
+        flex-direction: row; /* Botões lado a lado em telas maiores */
+        justify-content: center;
+        flex-wrap: wrap; /* Permite quebrar linha se não couber */
+    }
+    .button-group a,
+    .button-group button {
+        flex-grow: 1; /* Para que os botões se expandam e preencham o espaço */
+        max-width: 200px; /* Limita a largura dos botões em linha */
+    }
+}
+
+/* Botão de Logout */
+.logout-btn {
+    background-color: var(--error-color);
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 12px;
+    font-size: 0.9em;
     border-radius: 5px;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease;
-    width: 60%;
-    margin: 0 auto;
 }
 
-.admin .button-group a:hover {
-    background-color: #16a34a;
+.logout-btn:hover {
+    background-color: #c82333; /* Tom de vermelho mais escuro */
 }
 
-.admin .logout-button {
-    display: block;
-    margin: 30px auto 0 auto;
-    padding: 10px 15px;
-    background-color: #dc3545;
-    color: white;
-    text-align: center;
+.logout-link { /* Garante que o link em torno do botão não adicione estilos indesejados */
     text-decoration: none;
-    border-radius: 5px;
-    width: fit-content;
-    transition: background-color 0.3s ease;
 }
 
-.admin .logout-button:hover {
-    background-color: #c82333;
-}
 
-:root {
-    --cor-primaria: #22c55e;
-    --cor-secundaria: #16a34a;
-    --cor-sucesso: #22c55e;
-    --cor-sucesso-hover: #16a34a;
-    --cor-fundo: #f9fafb; /* você pode mudar para #f4f4f4 aqui se preferir */
-    --cor-texto: #111827;
-    --cor-borda: #e5e7eb;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4; /* sobrescrito */
-    margin: 0;
-    padding: 20px; /* adicionado */
-    color: var(--cor-texto);
-}
-
-.container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 500px;
-    margin: auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-/* Mantém seu h1 alinhado ao centro */
-h1 {
-    font-size: 24px;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
-p {
-    font-size: 18px;
-    margin: 10px 0;
-}
-:root {
-    --cor-primaria: #22c55e;
-    --cor-secundaria: #16a34a;
-    --cor-fundo: #f4f4f4;
-    --cor-texto: #111827;
-    --cor-botao-texto: #ffffff;
-    --cor-botao-fundo: var(--cor-primaria);
-    --cor-botao-hover: var(--cor-secundaria);
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: var(--cor-fundo);
-    margin: 0;
-    padding: 20px;
-    color: var(--cor-texto);
-}
-
-.container {
-    max-width: 500px;
-    background-color: white;
-    padding: 20px;
-    margin: 40px auto;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-h1 {
-    font-size: 28px;
+/* Mensagens de feedback (flashed messages) */
+.flash-message {
+    padding: 12px;
     margin-bottom: 20px;
-    color: var(--cor-primaria);
-}
-
-p {
-    font-size: 26px;
-    margin: 12px 0;
-    font-weight: 500;
-}
-
-button {
-    background-color: var(--cor-botao-fundo);
-    color: var(--cor-botao-texto);
-    border: none;
     border-radius: 8px;
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 5px;
-    min-width: 120px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-button:hover {
-    background-color: var(--cor-botao-hover);
+.flash-message.success {
+    background-color: var(--secondary-color);
+    color: var(--primary-dark);
+    border: 1px solid #a3e0b1;
 }
 
-a {
-    text-decoration: none;
+.flash-message.error {
+    background-color: var(--error-bg);
+    color: var(--error-color);
+    border: 1px solid #f5c6cb;
+}
+
+.flash-message.info {
+    background-color: var(--info-bg);
+    color: var(--info-color);
+    border: 1px solid #b8daff;
+}
+
+.flash-message.warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-color);
+    border: 1px solid #ffeeba;
+}
+
+/* Estilo para tabelas (usado em Consultar Aluno) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: var(--white-bg);
+    border-radius: 8px;
+    overflow: hidden; /* Para cantos arredondados */
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+tr:nth-child(even) { /* Estilo para linhas pares */
+    background-color: #f8f8f8;
+}
+
+/* Informações do Aluno no Debitar Saldo */
+.aluno-info {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #e6ffe6; /* Um verde bem suave */
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    text-align: left;
+}
+.aluno-info h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+.aluno-info p {
+    margin: 8px 0;
+}
+
+/* Toast para mensagens de erro/sucesso temporárias */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--error-color);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 1;
+    animation: fadeout 0.5s ease-in-out 2.5s forwards;
+}
+
+@keyframes fadeout {
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+        visibility: hidden;
+    }
 }

@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil do Usuário</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
@@ -10,12 +11,20 @@
 <body>
     <div class="container">
         <h1>Olá {{ usuario.nome }}, suas informações estão abaixo!</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <p><strong>Nome:</strong> {{ usuario.nome }}</p>
         <p><strong>CPF:</strong> {{ usuario.cpf }}</p>
-        <p><strong>Saldo:</strong> {{ usuario.saldo_formatado }}</p>
+        <p><strong>Saldo:</strong> R$ {{ "%.2f"|format(usuario.saldo) }}</p>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="/inicio"><button>Voltar</button></a>
+        <div class="button-group">
+            <a href="{{ url_for('inicio') }}" class="button">Voltar</a>
         </div>
     </div>
 </body>

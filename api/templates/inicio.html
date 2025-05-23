@@ -5,26 +5,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Recarga de Saldo</title>
+    <title>Início</title>
 </head>
 
 <body>
     <div class="container">
         <a href="{{ url_for('logout') }}" class="logout-link">
-            <button class="logout-btn">Logout</button>
+            <button class="logout-btn">Sair</button>
         </a>
 
-        <div class="usuario-logado">
-            <p>Olá, {{ usuario.nome }}!</p>
-        </div>
+        <h1>Olá, {{ usuario.nome }}!</h1>
 
-        <div class="nav-buttons">
-            <form method="get">
-                <button type="submit" name="acao" value="perfil">Visualizar Perfil</button>
-            </form>
-            <form method="get">
-                <button type="submit" name="acao" value="recarregar">Recarregar</button>
-            </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="button-group">
+            <button type="button" onclick="window.location.href='/inicio?acao=perfil'">Visualizar Perfil</button>
+            <button type="button" onclick="window.location.href='/pagamento'">Recarregar Saldo</button>
         </div>
     </div>
 </body>
