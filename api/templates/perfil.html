@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Perfil do Usuário</title>
-    <style>
-        body { font-family: Arial; padding: 20px; background-color: #f4f4f4; }
-        .container { background-color: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; }
-        p { font-size: 18px; margin: 10px 0; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
+
 <body>
     <div class="container">
-        <h1>Perfil do Usuário</h1>
+        <h1>Olá {{ usuario.nome }}, suas informações estão abaixo!</h1>
         <p><strong>Nome:</strong> {{ usuario.nome }}</p>
         <p><strong>CPF:</strong> {{ usuario.cpf }}</p>
         <p><strong>Saldo:</strong> {{ usuario.saldo_formatado }}</p>
@@ -22,4 +19,5 @@
         </div>
     </div>
 </body>
+
 </html>

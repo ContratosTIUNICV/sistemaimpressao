@@ -195,33 +195,52 @@ form button+button {
 }
 
 /* Se você quiser aumentar a largura da container só na admin: */
-.admin body,
 .admin {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+    display: block;
     justify-content: center;
     align-items: center;
-    margin-top: 15%;
+    min-height: 100vh;
+    background-color: var(--cor-fundo);
 }
 
-.admin .container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
 
-.admin h1 {
+.admin-header {
     text-align: center;
-    color: #333;
+    margin-top: 12vh;
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    font-size: 2rem;
+
+    color: #60925b;
+    text-decoration: underline;
+}
+
+.principal {
+    border-radius: 10px;
+    background-color: #e7eeec;
+    width: 50%;
+    max-width: 900px;
+    min-height: 30vh;
+    padding: 40px;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
 }
 
 .admin .button-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 .admin .button-group a {
@@ -234,19 +253,17 @@ form button+button {
     border-radius: 5px;
     font-size: 1.1em;
     transition: background-color 0.3s ease;
-    width: 50%;
-    margin-left: auto;  
-    margin-right: auto;
+    width: 60%;
+    margin: 0 auto;
 }
 
 .admin .button-group a:hover {
     background-color: #16a34a;
-    /* Verde escuro */
 }
 
 .admin .logout-button {
     display: block;
-    margin-top: 30px;
+    margin: 30px auto 0 auto;
     padding: 10px 15px;
     background-color: #dc3545;
     color: white;
@@ -254,11 +271,109 @@ form button+button {
     text-decoration: none;
     border-radius: 5px;
     width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
     transition: background-color 0.3s ease;
 }
 
 .admin .logout-button:hover {
     background-color: #c82333;
+}
+
+:root {
+    --cor-primaria: #22c55e;
+    --cor-secundaria: #16a34a;
+    --cor-sucesso: #22c55e;
+    --cor-sucesso-hover: #16a34a;
+    --cor-fundo: #f9fafb; /* você pode mudar para #f4f4f4 aqui se preferir */
+    --cor-texto: #111827;
+    --cor-borda: #e5e7eb;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* sobrescrito */
+    margin: 0;
+    padding: 20px; /* adicionado */
+    color: var(--cor-texto);
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* Mantém seu h1 alinhado ao centro */
+h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+p {
+    font-size: 18px;
+    margin: 10px 0;
+}
+:root {
+    --cor-primaria: #22c55e;
+    --cor-secundaria: #16a34a;
+    --cor-fundo: #f4f4f4;
+    --cor-texto: #111827;
+    --cor-botao-texto: #ffffff;
+    --cor-botao-fundo: var(--cor-primaria);
+    --cor-botao-hover: var(--cor-secundaria);
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--cor-fundo);
+    margin: 0;
+    padding: 20px;
+    color: var(--cor-texto);
+}
+
+.container {
+    max-width: 500px;
+    background-color: white;
+    padding: 20px;
+    margin: 40px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: var(--cor-primaria);
+}
+
+p {
+    font-size: 26px;
+    margin: 12px 0;
+    font-weight: 500;
+}
+
+button {
+    background-color: var(--cor-botao-fundo);
+    color: var(--cor-botao-texto);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 5px;
+    min-width: 120px;
+}
+
+button:hover {
+    background-color: var(--cor-botao-hover);
+}
+
+a {
+    text-decoration: none;
 }
