@@ -17,6 +17,10 @@ key: str = os.getenv("SUPABASE_KEY")
 # Cria o cliente do Supabase
 supabase: Client = create_client(url, key)
 
+@app.route('/imagens/<path:filename>')
+def imagens(filename):
+    return send_from_directory(os.path.join(app.root_path, 'templates', 'imagens'), filename)
+
 def login_required():
     def wrapper(f):
         @wraps(f)
@@ -294,3 +298,9 @@ def logout():
 
 def handler(request, context=None):
     return app(request.environ, start_response=context)
+
+if __name__ == "__main__":
+    from os import getenv
+    port = int(getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
