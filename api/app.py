@@ -170,7 +170,8 @@ def inicio():
     acao = request.args.get("acao")
     if acao == "perfil":
         return render_template("perfil.html", usuario=usuario_data)
-
+    if acao == "pagamento":
+        return render_template("pagamento.html", usuario=usuario_data)
     return render_template('inicio.html', usuario=usuario_data)
 
 @app.route('/admin')

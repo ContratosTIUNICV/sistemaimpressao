@@ -9,24 +9,23 @@
 </head>
 
 <body>
-    <div class="container">
-        <a href="{{ url_for('logout') }}" class="logout-link">
-            <button class="logout-btn">Sair</button>
-        </a>
+    <a href="{{ url_for('logout') }}" class="logout-link">
+        <button class="logout-btn">Sair</button>
+    </a>
 
-        <h1>Olá, {{ usuario.nome }}!</h1>
+    <div class="inicio-container"> <h1>Olá, {{ usuario.nome }}!</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="flash-message {{ category }}">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
         {% endwith %}
 
-        <div class="button-group">
-            <button type="button" onclick="window.location.href='/inicio?acao=perfil'">Visualizar Perfil</button>
-            <button type="button" onclick="window.location.href='/pagamento'">Recarregar Saldo</button>
+        <div class="inicio-button-group">
+            <a href="{{ url_for('inicio', acao='perfil') }}" class="inicio-button">Visualizar Perfil</a>
+            <a href="{{ url_for('inicio', acao='pagamento') }}" class="inicio-button">Recarregar Saldo</a>
         </div>
     </div>
 </body>

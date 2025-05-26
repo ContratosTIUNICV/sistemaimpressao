@@ -1,252 +1,458 @@
-/* style.css */
-
-:root {
-    /* Cores baseadas no verde */
-    --primary-color: #28a745; /* Verde principal para botões e cabeçalhos */
-    --primary-dark: #218838;  /* Verde mais escuro para hover */
-    --secondary-color: #d4edda; /* Verde claro para backgrounds de sucesso */
-    --text-color: #333;       /* Cor de texto padrão */
-    --light-bg: #f4f4f4;      /* Fundo claro para o corpo */
-    --white-bg: #fff;         /* Fundo branco para containers */
-    --border-color: #ddd;     /* Cor de borda leve */
-    --error-color: #dc3545;   /* Vermelho para erros */
-    --error-bg: #f8d7da;      /* Fundo de erro */
-    --info-color: #007bff;    /* Azul para info */
-    --info-bg: #cce5ff;       /* Fundo de info */
-    --warning-color: #ffc107; /* Amarelo para warning */
-    --warning-bg: #fff3cd;    /* Fundo de warning */
-}
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 20px;
+    /* Espaçamento nas bordas do corpo */
     background-color: var(--light-bg);
     color: var(--text-color);
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center;     /* Centraliza verticalmente */
-    min-height: 100vh;       /* Garante que o corpo ocupa toda a altura da viewport */
+    flex-direction: column;
+    /* Empilha elementos como mensagens e o container */
+    align-items: center;
+    /* Centraliza o container na página */
+    min-height: 100vh;
+    /* Garante que o corpo ocupe toda a altura */
     box-sizing: border-box;
-    font-size: larger;
 }
-
-.container {
-    background-color: var(--white-bg);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* ===== ADMIN STYLE ===== */
+:root {
+    --primary-color: #28a745;
+    /* Verde principal */
+    --primary-dark: #218838;
+    /* Verde mais escuro para hover */
+    --text-color: #333;
+    /* Cor de texto padrão */
+    --light-bg: #f4f4f4;
+    /* Fundo claro para o corpo da página */
+    --white-bg: #fff;
+    /* Fundo branco para contêineres */
+    --border-color: #ddd;
+    /* Cor de borda suave */
+    --error-color: #dc3545;
+    /* Vermelho para mensagens de erro */
+    --error-text-color: #721c24;
+    /* Texto mais escuro para fundo de erro claro */
+    --error-bg: #f8d7da;
+    /* Fundo claro para mensagens de erro */
+    --success-color: #155724;
+    /* Texto mais escuro para fundo de sucesso claro */
+    --success-bg: #d4edda;
+    /* Fundo claro para mensagens de sucesso */
+    --info-color: #004085;
+    /* Azul escuro para texto em fundo de info */
+    --info-bg: #cce5ff;
+    /* Fundo claro para info */
+    --warning-text-color: #856404;
+    /* Amarelo escuro para texto em fundo de warning */
+    --warning-bg: #fff3cd;
+    /* Fundo claro para warning */
+}
+.admin-container h1 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 35px;
+    font-size: 2.3em;
+    font-weight: 600;
+}
+.admin-logout-link {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    text-decoration: none;
+    z-index: 1000;
+}
+.admin-logout-btn {
+    background-color: var(--error-color);
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.admin-logout-btn:hover {
+    background-color: var(--error-dark);
+}
+.admin-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 30px;
+    align-items: center;
+}
+.admin-button-group a {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-block;
+    min-width: 240px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.admin-button-group a:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+@media (min-width: 600px) {
+    .admin-button-group {
+        flex-direction: row;
+        justify-content: center;
+        gap: 25px;
+    }
+}
+/* ===== ESTILOS PARA PÁGINA DE CADASTRO ===== */
+.cadastro-container {
     width: 100%;
-    max-width: 70%; /* Largura máxima para centralizar o conteúdo */
-    margin: 20px; /* Margem para telas menores */
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px 40px;
+    background-color: var(--white-bg);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
-    position: relative; /* Para posicionar o botão de logout */
 }
 
-.admin-dashboard .container {
-    max-width: 800px; /* Maior largura para o painel admin */
-}
-
-h1 {
+.cadastro-container h1 {
     text-align: center;
     color: var(--primary-color);
-    margin-bottom: 25px;
+    margin-top: 0;
+    margin-bottom: 30px;
     font-size: 2em;
 }
 
-/* Formulários e Inputs */
-form {
+.cadastro-form {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espaço entre os elementos do formulário */
+    gap: 5px;
+    /* Reduzido o gap direto do form, pois .cadastro-form-group controlará mais */
 }
 
-label {
+.cadastro-form-group {
+    margin-bottom: 18px;
+    /* Espaço entre os grupos de label/input */
+}
+
+.cadastro-label {
     font-weight: bold;
     color: var(--text-color);
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    /* Espaço entre label e input */
+    text-align: left;
+    display: block;
 }
 
-input[type="text"],
-input[type="password"],
-input[type="number"],
-input[type="email"] { /* Adicione email se for usar */
-    width: calc(100% - 20px); /* Ajusta a largura considerando o padding */
-    padding: 10px;
+.cadastro-input {
+    width: 100%;
+    padding: 12px;
     border: 1px solid var(--border-color);
-    border-radius: 5px;
+    border-radius: 6px;
     font-size: 1em;
-    box-sizing: border-box; /* Inclui padding e borda na largura */
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-input:focus {
+.cadastro-input::placeholder {
+    color: #aaa;
+}
+
+.cadastro-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
 }
 
-/* Botões Gerais */
-button, .button-group a {
+.cadastro-button {
     background-color: var(--primary-color);
     color: white;
     padding: 12px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 1.1em;
+    font-weight: bold;
+    text-transform: uppercase;
     transition: background-color 0.3s ease;
-    text-decoration: none; /* Para links agindo como botões */
-    display: inline-block; /* Para links em grupo de botões */
-    text-align: center;
-    box-sizing: border-box;
+    margin-top: 15px;
+    /* Espaço acima do botão, ajustado de acordo com .cadastro-form-group */
+    width: 100%;
 }
 
-button:hover, .button-group a:hover {
+.cadastro-button:hover {
     background-color: var(--primary-dark);
 }
 
-/* Botões Específicos */
-button[type="submit"] {
-    margin-top: 15px;
-}
-
-.button-group {
-    display: flex;
-    flex-direction: column; /* Botões um abaixo do outro por padrão */
-    gap: 10px;
-    margin-top: 20px;
-}
-
-@media (min-width: 600px) {
-    .button-group {
-        flex-direction: row; /* Botões lado a lado em telas maiores */
-        justify-content: center;
-        flex-wrap: wrap; /* Permite quebrar linha se não couber */
-    }
-    .button-group a,
-    .button-group button {
-        flex-grow: 1; /* Para que os botões se expandam e preencham o espaço */
-        max-width: 200px; /* Limita a largura dos botões em linha */
-    }
-}
-
-/* Botão de Logout */
-.logout-btn {
-    background-color: var(--error-color);
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 8px 12px;
-    font-size: 0.9em;
-    border-radius: 5px;
-}
-
-.logout-btn:hover {
-    background-color: #c82333; /* Tom de vermelho mais escuro */
-}
-
-.logout-link { /* Garante que o link em torno do botão não adicione estilos indesejados */
-    text-decoration: none;
-}
-
-
-/* Mensagens de feedback (flashed messages) */
 .flash-message {
-    padding: 12px;
-    margin-bottom: 20px;
+    padding: 15px;
+    margin-bottom: 25px;
     border-radius: 8px;
     text-align: center;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid transparent;
 }
 
 .flash-message.success {
-    background-color: var(--secondary-color);
-    color: var(--primary-dark);
-    border: 1px solid #a3e0b1;
+    background-color: var(--success-bg);
+    color: var(--success-color);
+    border-color: #a3e0b1;
 }
 
 .flash-message.error {
     background-color: var(--error-bg);
-    color: var(--error-color);
-    border: 1px solid #f5c6cb;
+    color: var(--error-text-color);
+    border-color: #f5c6cb;
 }
 
 .flash-message.info {
     background-color: var(--info-bg);
     color: var(--info-color);
-    border: 1px solid #b8daff;
+    border-color: #b8daff;
 }
 
 .flash-message.warning {
     background-color: var(--warning-bg);
-    color: var(--warning-color);
-    border: 1px solid #ffeeba;
+    color: var(--warning-text-color);
+    border-color: #ffeeba;
 }
 
-/* Estilo para tabelas (usado em Consultar Aluno) */
-table {
+.login-container {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    max-width: 450px;
+    margin: 60px auto;
+    padding: 30px 40px;
     background-color: var(--white-bg);
-    border-radius: 8px;
-    overflow: hidden; /* Para cantos arredondados */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
-th, td {
-    border: 1px solid var(--border-color);
-    padding: 12px;
-    text-align: left;
-}
-
-th {
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: bold;
-}
-
-tr:nth-child(even) { /* Estilo para linhas pares */
-    background-color: #f8f8f8;
-}
-
-/* Informações do Aluno no Debitar Saldo */
-.aluno-info {
-    margin-top: 25px;
-    padding: 20px;
-    background-color: #e6ffe6; /* Um verde bem suave */
-    border: 1px solid var(--primary-color);
-    border-radius: 8px;
-    text-align: left;
-}
-.aluno-info h2 {
+/* ===== ESTILOS PARA PÁGINA DE LOGIN ===== */
+.login-container h1 {
+    text-align: center;
     color: var(--primary-color);
     margin-top: 0;
-    margin-bottom: 15px;
-}
-.aluno-info p {
-    margin: 8px 0;
+    margin-bottom: 30px;
+    font-size: 2em;
 }
 
-/* Toast para mensagens de erro/sucesso temporárias */
-.toast {
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.login-form-group {
+    margin-bottom: 18px;
+}
+
+.login-label {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    text-align: left;
+    display: block;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-input::placeholder {
+    color: #aaa;
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+}
+
+.login-button-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-button {
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    width: 100%;
+}
+
+.login-button-submit {
+    background-color: var(--primary-color);
+}
+
+.login-button-submit:hover {
+    background-color: var(--primary-dark);
+}
+
+.login-button-register {
+    background-color: #6c757d;
+}
+
+.login-button-register:hover {
+    background-color: #5a6268;
+}
+
+.form-message {
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid transparent;
+}
+
+.form-message.success {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+    border-color: #a3e0b1;
+}
+
+.form-message.error {
+    background-color: var(--error-bg);
+    color: var(--error-text-color);
+    border-color: #f5c6cb;
+}
+
+.form-message.info {
+    background-color: var(--info-bg);
+    color: var(--info-color);
+    border-color: #b8daff;
+}
+
+.form-message.warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-text-color);
+    border-color: #ffeeba;
+}
+.logout-link {
     position: fixed;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 20px;
+    text-decoration: none;
+    z-index: 1000;
+}
+.logout-btn {
     background-color: var(--error-color);
     color: white;
-    padding: 16px 24px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    opacity: 1;
-    animation: fadeout 0.5s ease-in-out 2.5s forwards;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
-
-@keyframes fadeout {
-    to {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-20px);
-        visibility: hidden;
+.logout-btn:hover {
+    background-color: var(--error-dark);
+}
+/* ===== ESTILOS PARA PÁGINA DE INÍCIO ===== */
+.inicio-container {
+    width: 100%;
+    max-width: 750px;
+    margin: 80px auto 40px auto;
+    padding: 35px 45px;
+    background-color: var(--white-bg);
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    text-align: center;
+}
+.inicio-container h1 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 35px;
+    font-size: 2.3em;
+    font-weight: 600;
+}
+.inicio-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 30px;
+    align-items: center;
+}
+.inicio-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-block;
+    min-width: 240px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.inicio-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+@media (min-width: 600px) {
+    .inicio-button-group {
+        flex-direction: row;
+        justify-content: center;
+        gap: 25px;
     }
+
+    .inicio-button {}
+}
+.flash-message {
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid transparent;
+}
+.flash-message.success {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+    border-color: #a3e0b1;
+}
+.flash-message.error {
+    background-color: var(--error-bg);
+    color: var(--error-text-color);
+    border-color: #f5c6cb;
+}
+.flash-message.info {
+    background-color: var(--info-bg);
+    color: var(--info-color);
+    border-color: #b8daff;
+}
+.flash-message.warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-text-color);
+    border-color: #ffeeba;
 }

@@ -2,24 +2,28 @@
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <title>Painel Administrativo</title>
 </head>
 
-<body>
-    <div class="container admin-dashboard">
-        <a href="{{ url_for('logout') }}" class="logout-link">
-            <button class="logout-btn">Sair</button>
-        </a>
-        <h1>Seja muito bem vindo, {{ session.get('usuario') }}!</h1>
+<body style="position: relative; min-height: 100vh;">
 
-        <div class="button-group">
+    <!-- Botão de logout fora do container -->
+    <a href="{{ url_for('logout') }}" class="admin-logout-link">
+        <button class="admin-logout-btn">Sair</button>
+    </a>
+
+    <div class="admin-container admin-dashboard">
+        <h1>Olá {{ session.get('usuario') }}!</h1>
+
+        <div class="admin-button-group">
             <a href="{{ url_for('consulta_aluno') }}">Consultar Alunos</a>
             <a href="{{ url_for('debitar_aluno') }}">Debitar Saldo de Aluno</a>
         </div>
     </div>
+
 </body>
 
 </html>

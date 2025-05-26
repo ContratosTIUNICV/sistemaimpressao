@@ -6,29 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <title>Login</title>
-    </head>
+</head>
 
 <body>
-    <div class="container">
+    <div class="login-container">
         <h1>Login</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="toast {{ category }}">{{ message }}</div> {% endfor %}
+                    <div class="form-message {{ category }}">{{ message }}</div>
+                {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form method="POST">
-            <label for="cpf">CPF:</label>
-            <input type="text" id="cpf" name="cpf" required /><br />
+        <form method="POST" class="login-form">
+            <div class="login-form-group">
+                <label for="cpf" class="login-label">CPF:</label>
+                <input type="text" id="cpf" name="cpf" class="login-input" placeholder="Digite seu CPF" required />
+            </div>
 
-            <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" required /><br />
+            <div class="login-form-group">
+                <label for="senha" class="login-label">Senha:</label>
+                <input type="password" id="senha" name="senha" class="login-input" placeholder="Digite sua senha" required />
+            </div>
 
-            <button type="submit">Entrar</button>
-            <button type="button" onclick="window.location.href='/cadastro'">Cadastrar</button>
+            <button type="submit" class="login-button login-button-submit">Entrar</button>
         </form>
-    </div>
+
+        <div class="login-link-alternativo">
+            <p>Não tem uma conta? <a href="{{ url_for('cadastro') }}" class="link-cadastro">Cadastrar</a></p>
+        </div>
+        </div>
 </body>
 
 </html>

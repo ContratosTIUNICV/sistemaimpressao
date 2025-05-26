@@ -10,7 +10,7 @@
 
 <body>
     <div class="container">
-        <h1>Olá {{ usuario.nome }}, suas informações estão abaixo!</h1>
+        <h1>Olá {{ usuario.nome }}!</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
