@@ -5,19 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Login</title>
 </head>
 
 <body>
     <div class="login-container">
         <h1>Login</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="form-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
         <form method="POST" class="login-form">
             <div class="login-form-group">
@@ -27,7 +21,8 @@
 
             <div class="login-form-group">
                 <label for="senha" class="login-label">Senha:</label>
-                <input type="password" id="senha" name="senha" class="login-input" placeholder="Digite sua senha" required />
+                <input type="password" id="senha" name="senha" class="login-input" placeholder="Digite sua senha"
+                    required />
             </div>
 
             <button type="submit" class="login-button login-button-submit">Entrar</button>
@@ -36,7 +31,30 @@
         <div class="login-link-alternativo">
             <p>Não tem uma conta? <a href="{{ url_for('cadastro') }}" class="link-cadastro">Cadastrar</a></p>
         </div>
-        </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% for category, message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: '{{ "success" if category == "sucesso" else "error" }}',
+                title: '{{ message }}',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+    {% endwith %}
 </body>
 
 </html>

@@ -7,7 +7,8 @@
     <title>Consultar Alunos</title>
 </head>
 <body>
-    <div class="container admin-dashboard"> <a href="{{ url_for('admin_dashboard') }}" class="button">Voltar para o Painel Admin</a>
+    <div class="admin-container"> 
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-button">Voltar para o Painel Admin</a>
         <h1>Consultar Alunos</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -18,26 +19,27 @@
         {% endwith %}
 
         {% if alunos %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>CPF</th>
-                        <th>Nome</th>
-                        <th>Saldo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for aluno in alunos %}
+            <div class="table-responsive-wrapper"> <table>
+                    <thead>
                         <tr>
-                            <td>{{ aluno.cpf }}</td>
-                            <td>{{ aluno.nome }}</td>
-                            <td>R$ {{ "%.2f"|format(aluno.saldo) }}</td>
+                            <th>CPF</th>
+                            <th>Nome</th>
+                            <th>Saldo</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for aluno in alunos %}
+                            <tr>
+                                <td data-label="CPF">{{ aluno.cpf }}</td>
+                                <td data-label="Nome">{{ aluno.nome }}</td>
+                                <td data-label="Saldo">R$ {{ "%.2f"|format(aluno.saldo) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-            <p>Nenhum aluno encontrado.</p>
+            <p class="nenhum-aluno-mensagem">Nenhum aluno encontrado.</p>
         {% endif %}
     </div>
 </body>

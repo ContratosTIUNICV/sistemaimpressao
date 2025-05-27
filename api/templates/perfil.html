@@ -9,23 +9,33 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Olá {{ usuario.nome }}!</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
+    <div class="perfil-container">
+        <div class="perfil-navegacao-topo">
+            <a href="{{ url_for('inicio') }}" class="perfil-button perfil-button-voltar">
+                <span class="icone-botao">&larr;</span> Voltar
+            </a>
+            <a href="{{ url_for('editar_perfil') }}" class="perfil-button perfil-button-editar"> Editar Perfil <span
+                    class="icone-botao">&#9998;</span>
+            </a>
+        </div>
+
+        <h1>Olá {{ usuario.nome }}!</h1> {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
-        <p><strong>Nome:</strong> {{ usuario.nome }}</p>
-        <p><strong>CPF:</strong> {{ usuario.cpf }}</p>
-        <p><strong>Saldo:</strong> R$ {{ "%.2f"|format(usuario.saldo) }}</p>
-
-        <div class="button-group">
-            <a href="{{ url_for('inicio') }}" class="button">Voltar</a>
+        <div class="perfil-dados-card">
+            <p class="perfil-dado-item"><strong>Nome:</strong> <span class="perfil-dado-valor">{{ usuario.nome }}</span>
+            </p>
+            <p class="perfil-dado-item"><strong>CPF:</strong> <span class="perfil-dado-valor">{{ usuario.cpf }}</span>
+            </p>
+            <p class="perfil-dado-item perfil-dado-saldo"><strong>Saldo:</strong> <span class="perfil-dado-valor">R$ {{
+                    "%.2f"|format(usuario.saldo) }}</span></p>
         </div>
+
     </div>
 </body>
 

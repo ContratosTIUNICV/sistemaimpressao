@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="perfil-container editar-perfil-container"> <div class="perfil-navegacao-topo">
+            <a href="{{ url_for('inicio', acao='perfil') }}" class="perfil-button perfil-button-voltar">
+                <span class="icone-botao">&larr;</span> Cancelar
+            </a>
+        </div>
+
+        <h1>Editar Perfil</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="perfil-form editar-form"> <div class="form-group"> <label for="cpf" class="form-label">CPF:</label>
+                <input type="text" id="cpf" name="cpf" class="form-input" value="{{ usuario.cpf }}" readonly disabled>
+                <small>Seu CPF não pode ser alterado. Caso haja necessidade, consulte a secretaria!</small>
+            </div>
+
+            <div class="form-group">
+                <label for="nome" class="form-label">Nome:</label>
+                <input type="text" id="nome" name="nome" class="form-input" value="{{ usuario.nome }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nova_senha" class="form-label">Nova Senha:</label>
+                <input type="password" id="nova_senha" name="nova_senha" class="form-input" placeholder="Deixe em branco para não alterar">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmar_nova_senha" class="form-label">Confirmar Nova Senha:</label>
+                <input type="password" id="confirmar_nova_senha" name="confirmar_nova_senha" class="form-input" placeholder="Repita a nova senha">
+            </div>
+
+            <button type="submit" class="button button-primary button-full-width">Salvar Alterações</button>
+            </form>
+    </div>
+</body>
+</html>

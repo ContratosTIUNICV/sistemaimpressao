@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, redirect, url_for, session, redirect, url_for, render_template
+from flask import Flask, request, jsonify, redirect, url_for, session, redirect, url_for, render_template, flash
 from functools import wraps
 import datetime
 from supabase import create_client, Client
@@ -42,56 +42,49 @@ def admin_required():
         return decorated_function
     return wrapper
 
+from flask import flash  # já deve estar importado
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error_message = None
-
     if request.method == 'POST':
         cpf_input = request.form.get('cpf')
         senha_input = request.form.get('senha')
 
         if not cpf_input or not senha_input:
-            error_message = 'CPF e senha são obrigatórios.'
-            return render_template('login.html', error_message=error_message)
+            flash('CPF e senha são obrigatórios.', 'erro')
+            return render_template('login.html')
 
-        result = supabase.table("usuario").select("cpf, senha, aluno").eq("cpf", cpf_input).limit(1).execute()
+        result = supabase.table("usuario").select("cpf, senha, aluno, nome").eq("cpf", cpf_input).limit(1).execute()
 
         if result.data and len(result.data) == 1:
             usuario = result.data[0]
             stored_senha_hash_str = usuario['senha']
             is_aluno = usuario.get('aluno', True)
-            print(f"DEBUG: Senha hash recuperada do Supabase (string): '{stored_senha_hash_str}'")
-            print(f"DEBUG: Tipo da senha hash recuperada: {type(stored_senha_hash_str)}")
-            print(f"DEBUG: Comprimento da senha hash recuperada: {len(stored_senha_hash_str) if stored_senha_hash_str else 'None'}")
+            nome = usuario.get('nome', 'usuário')
+
             try:
                 senha_hash_bytes = stored_senha_hash_str.encode('utf-8')
             except AttributeError:
-                error_message = 'Erro interno: formato da senha inválido.'
-                print("ERROR: stored_senha_hash_str não é uma string válida ou é None ao tentar encode.")
-                return render_template('login.html', error_message=error_message)
-            print(f"DEBUG: Senha hash após encode para bytes: '{senha_hash_bytes}'")
-            print(f"DEBUG: Tipo da senha hash após encode: {type(senha_hash_bytes)}")
+                flash('Erro interno: formato da senha inválido.', 'erro')
+                return render_template('login.html')
+
             if bcrypt.checkpw(senha_input.encode('utf-8'), senha_hash_bytes):
                 session['logged_in'] = True
                 session['usuario'] = cpf_input
                 session['is_aluno'] = is_aluno
-                
                 if is_aluno:
                     return redirect(url_for('inicio'))
                 else:
                     return redirect(url_for('admin_dashboard'))
             else:
-                error_message = 'Senha incorreta.'
+                flash('Senha incorreta.', 'erro')
         else:
-            error_message = 'Usuário não encontrado.'
+            flash('Usuário não encontrado.', 'erro')
 
-    return render_template('login.html', error_message=error_message)
+    return render_template('login.html')
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
-    error_message = None
-    success_message = None
-
     if request.method == 'POST':
         cpf = request.form.get('cpf')
         senha = request.form.get('senha')
@@ -99,18 +92,17 @@ def cadastro():
         is_aluno = True 
 
         if not cpf or not senha or not nome:
-            error_message = 'Todos os campos (CPF, Senha, Nome) são obrigatórios.'
-            return render_template('cadastro.html', error_message=error_message)
+            flash('Todos os campos (CPF, Senha, Nome) são obrigatórios.', 'erro')
+            return render_template('cadastro.html')
 
         try:
             existing_user = supabase.table("usuario").select("cpf").eq("cpf", cpf).limit(1).execute()
-            if existing_user.data and len(existing_user.data) > 0:
-                error_message = f'O CPF {cpf} já está cadastrado.'
-                return render_template('cadastro.html', error_message=error_message)
+            if existing_user.data:
+                flash(f'O CPF {cpf} já está cadastrado.', 'erro')
+                return render_template('cadastro.html')
 
             senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            print(f"DEBUG: Senha hash gerada para inserção: '{senha_hash}'")
-            print(f"DEBUG: Tipo da senha hash gerada: {type(senha_hash)}")
+
             supabase.table("usuario").insert({
                "cpf": cpf,
                "senha": senha_hash,
@@ -118,17 +110,13 @@ def cadastro():
                "saldo": 0,
                "aluno": is_aluno
             }).execute()
+            return redirect(url_for('inicio'))
 
-            session['logged_in'] = True
-            session['usuario'] = cpf
-            session['is_aluno'] = is_aluno 
-            success_message = 'Cadastro realizado com sucesso! Redirecionando para a página inicial...'
-            return redirect(url_for('inicio')) 
         except Exception as e:
-            print(f"ERROR - Cadastro: Erro ao cadastrar usuário: {e}")
-            error_message = 'Ocorreu um erro ao cadastrar. Tente novamente.'
+            print(f"ERRO: {e}")
+            flash('Ocorreu um erro ao cadastrar. Tente novamente.', 'erro')
 
-    return render_template('cadastro.html', error_message=error_message, success_message=success_message)
+    return render_template('cadastro.html')
 
 @app.route('/')
 def home():
@@ -192,46 +180,6 @@ def consulta_aluno():
     except Exception as e:
         print(f"ERROR - Consulta Aluno: {e}")
     return render_template('consulta_aluno.html', alunos=alunos)
-
-@app.route('/cadastroaluno', methods=['GET', 'POST'])
-@admin_required()
-def cadastro_aluno():
-    error_message = None
-    success_message = None
-
-    if request.method == 'POST':
-        cpf = request.form.get('cpf')
-        senha = request.form.get('senha')
-        nome = request.form.get('nome')
-        is_aluno = True
-
-        if not cpf or not senha or not nome:
-            error_message = 'Todos os campos (CPF, Senha, Nome) são obrigatórios.'
-            return render_template('cadastro_aluno.html', error_message=error_message)
-
-        try:
-            existing_user = supabase.table("usuario").select("cpf").eq("cpf", cpf).limit(1).execute()
-            if existing_user.data and len(existing_user.data) > 0:
-                error_message = f'O CPF {cpf} já está cadastrado.'
-                return render_template('cadastro_aluno.html', error_message=error_message)
-
-            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-            supabase.table("usuario").insert({
-               "cpf": cpf,
-               "senha": senha_hash,
-               "nome": nome,
-               "saldo": 0,
-               "aluno": is_aluno
-            }).execute()
-
-            success_message = f'Aluno {nome} ({cpf}) cadastrado com sucesso!'
-        except Exception as e:
-            print(f"ERROR - Cadastro Aluno: Erro ao cadastrar aluno: {e}")
-            error_message = 'Ocorreu um erro ao cadastrar o aluno. Tente novamente.'
-    
-    return render_template('cadastro_aluno.html', error_message=error_message, success_message=success_message)
-
 @app.route('/debitaraluno', methods=['GET', 'POST'])
 @admin_required()
 def debitar_aluno():
@@ -286,7 +234,79 @@ def debitar_aluno():
             error_message = 'Ocorreu um erro. Tente novamente.'
 
     return render_template('debitar_aluno.html', error_message=error_message, success_message=success_message, aluno_info=aluno_info)
+@app.route('/perfil/editar', methods=['GET', 'POST'], endpoint='editar_perfil')
+@login_required() # Reutilizando seu decorador
+def editar_perfil():
+    cpf_usuario_logado = session.get('usuario')
+    if not cpf_usuario_logado:
+        flash('Erro: Sessão inválida. Faça login novamente.', 'error')
+        return redirect(url_for('login'))
 
+    # Buscar dados atuais do usuário para GET e para verificar o nome atual no POST
+    try:
+        result = supabase.table("usuario").select("nome, cpf").eq("cpf", cpf_usuario_logado).limit(1).execute()
+        if not result.data:
+            flash('Usuário não encontrado.', 'error')
+            return redirect(url_for('inicio'))
+        usuario_atual = result.data[0]
+    except Exception as e:
+        print(f"ERROR - Editar Perfil (GET user data): {e}")
+        flash('Erro ao carregar dados do perfil. Tente novamente.', 'error')
+        return redirect(url_for('inicio', acao='perfil')) # Redireciona para a visualização do perfil
+
+    if request.method == 'POST':
+        novo_nome = request.form.get('nome')
+        nova_senha = request.form.get('nova_senha')
+        confirmar_nova_senha = request.form.get('confirmar_nova_senha')
+
+        dados_para_atualizar = {}
+        houve_alteracao = False
+
+        # Validar e atualizar nome
+        if novo_nome and novo_nome.strip() == "":
+            flash('O nome não pode ser vazio.', 'error')
+            return render_template('editar_perfil.html', usuario=usuario_atual)
+        
+        if novo_nome and novo_nome != usuario_atual.get('nome'):
+            dados_para_atualizar['nome'] = novo_nome
+            houve_alteracao = True
+
+        # Validar e atualizar senha
+        if nova_senha: # Usuário quer mudar a senha
+            if len(nova_senha) < 4: # Exemplo de validação mínima
+                 flash('A nova senha deve ter pelo menos 4 caracteres.', 'error')
+                 return render_template('editar_perfil.html', usuario=usuario_atual)
+            if nova_senha != confirmar_nova_senha:
+                flash('As senhas não coincidem.', 'error')
+                return render_template('editar_perfil.html', usuario=usuario_atual)
+            
+            try:
+                senha_hash = bcrypt.hashpw(nova_senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                dados_para_atualizar['senha'] = senha_hash
+                houve_alteracao = True
+            except Exception as e:
+                print(f"ERROR - Editar Perfil (Password Hash): {e}")
+                flash('Erro ao processar nova senha.', 'error')
+                return render_template('editar_perfil.html', usuario=usuario_atual)
+
+        if houve_alteracao and dados_para_atualizar:
+            try:
+                supabase.table("usuario").update(dados_para_atualizar).eq("cpf", cpf_usuario_logado).execute()
+                flash('Perfil atualizado com sucesso!', 'success')
+                # Se o nome foi alterado e você armazena o nome na sessão (além do CPF), atualize-o aqui.
+                # Ex: if 'nome' in dados_para_atualizar: session['usuario_nome'] = dados_para_atualizar['nome']
+            except Exception as e:
+                print(f"ERROR - Editar Perfil (Supabase Update): {e}")
+                flash('Erro ao atualizar o perfil no banco de dados. Tente novamente.', 'error')
+                return render_template('editar_perfil.html', usuario=usuario_atual) # Permite tentar novamente
+        elif not houve_alteracao:
+             flash('Nenhuma alteração foi detectada.', 'info')
+
+
+        return redirect(url_for('inicio', acao='perfil')) # Redireciona para a visualização do perfil
+
+    # Para requisições GET
+    return render_template('editar_perfil.html', usuario=usuario_atual)
 @app.route('/logout')
 def logout():
     session.clear()

@@ -9,10 +9,13 @@
 </head>
 
 <body>
-    <div class="container">
-        <a href="{{ url_for('logout') }}" class="logout-link">
-            <button class="logout-btn">Sair</button>
-        </a>
+    <div class="recarga-container">
+        <div class="recarga-navegacao-topo">
+            <a href="{{ url_for('inicio') }}" class="perfil-button perfil-button-voltar">
+                <span class="icone-botao">&larr;</span> Voltar
+            </a>
+        </div>
+
         <h1>Recarga de Saldo</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -22,21 +25,25 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST">
-            <label for="valor">Valor (R$):</label>
-            <input type="text" id="valor" name="valor" placeholder="Ex: 10.50" required pattern="^\d+(\.\d{1,2})?$" title="Use o formato 0.00 ou 0">
+        <form method="POST" class="recarga-form">
+            <div class="form-group">
+                <label for="valor" class="form-label">Valor (R$):</label>
+                <input type="text" id="valor" name="valor" class="form-input" placeholder="Ex: 10.50" required pattern="^\d+(\.\d{1,2})?$" title="Use o formato 0.00 ou 0">
+            </div>
 
-            <label for="descricao">Descrição (opcional):</label>
-            <input type="text" id="descricao" name="descricao" placeholder="Ex: Recarga para lanches">
+            <div class="form-group">
+                <label for="descricao" class="form-label">Descrição (opcional):</label>
+                <input type="text" id="descricao" name="descricao" class="form-input" placeholder="Ex: Recarga para lanches">
+            </div>
 
-            <button type="submit">Gerar Pagamento</button>
+            <button type="submit" class="button button-primary button-full-width">Gerar Pagamento</button>
         </form>
 
         {% if payment_link %}
-        <div class="flash-message info">
-            <p>Seu pagamento foi gerado!</p>
-            <p>Clique no link abaixo para finalizar:</p>
-            <p><a href="{{ payment_link }}" target="_blank">Pagar com Gateway</a></p>
+        <div class="payment-link-section flash-message info">
+            <p>Seu link de pagamento foi gerado!</p>
+            <p>Clique abaixo para finalizar:</p>
+            <p><a href="{{ payment_link }}" target="_blank" class="payment-gateway-link">Pagar Agora</a></p>
         </div>
         {% endif %}
     </div>
