@@ -6,4 +6,4 @@ python-dotenv==1.0.1
 requests==2.31.0
 supabase==2.0.3
 bcrypt
-mercadopago==1.0.50
+mercadopago==2.3.0 
