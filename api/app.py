@@ -6,6 +6,8 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from flask import send_from_directory
 import bcrypt
+import mercadopago
+sdk = mercadopago.SDK("APP_USR-3329527149542458-052717-28bb56f1a72c5d1af29f34065c847d48-283383607")
 app = Flask(__name__)
 
 app.secret_key = 'sua_chave_secreta' 
@@ -41,8 +43,6 @@ def admin_required():
             return f(*args, **kwargs)
         return decorated_function
     return wrapper
-
-from flask import flash  # já deve estar importado
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -85,6 +85,7 @@ def login():
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
+    cpf_usuario = session.get('usuario')
     if request.method == 'POST':
         cpf = request.form.get('cpf')
         senha = request.form.get('senha')
@@ -110,12 +111,11 @@ def cadastro():
                "saldo": 0,
                "aluno": is_aluno
             }).execute()
-            return redirect(url_for('inicio'))
-
+            flash(f'Seja bem-vindo, {nome}!', 'sucesso') 
+            return redirect(url_for('login')) 
         except Exception as e:
             print(f"ERRO: {e}")
             flash('Ocorreu um erro ao cadastrar. Tente novamente.', 'erro')
-
     return render_template('cadastro.html')
 
 @app.route('/')
@@ -158,8 +158,8 @@ def inicio():
     acao = request.args.get("acao")
     if acao == "perfil":
         return render_template("perfil.html", usuario=usuario_data)
-    if acao == "pagamento":
-        return render_template("pagamento.html", usuario=usuario_data)
+    if acao == "recarga":
+        return render_template("recarga.html", usuario=usuario_data)
     return render_template('inicio.html', usuario=usuario_data)
 
 @app.route('/admin')
@@ -180,6 +180,7 @@ def consulta_aluno():
     except Exception as e:
         print(f"ERROR - Consulta Aluno: {e}")
     return render_template('consulta_aluno.html', alunos=alunos)
+
 @app.route('/debitaraluno', methods=['GET', 'POST'])
 @admin_required()
 def debitar_aluno():
@@ -234,8 +235,9 @@ def debitar_aluno():
             error_message = 'Ocorreu um erro. Tente novamente.'
 
     return render_template('debitar_aluno.html', error_message=error_message, success_message=success_message, aluno_info=aluno_info)
+
 @app.route('/perfil/editar', methods=['GET', 'POST'], endpoint='editar_perfil')
-@login_required() # Reutilizando seu decorador
+@login_required()
 def editar_perfil():
     cpf_usuario_logado = session.get('usuario')
     if not cpf_usuario_logado:
@@ -307,6 +309,115 @@ def editar_perfil():
 
     # Para requisições GET
     return render_template('editar_perfil.html', usuario=usuario_atual)
+
+@app.route('/recarga', methods=['GET', 'POST'])
+def recarga():
+    payment_pix_copy_paste = None  # Renomeado para clareza
+    qr_code_base64 = None
+    payment_id = None # Útil para registrar ou verificar status depois
+
+    if request.method == 'POST':
+        valor_str = request.form.get('valor')
+        descricao = request.form.get('descricao') or "Recarga via Pix"
+
+        # 1. Validação do valor
+        if not valor_str:
+            flash("O valor da recarga é obrigatório.", "erro")
+            return render_template("recarga.html", payment_pix_copy_paste=None, qr_code_base64=None)
+        
+        try:
+            valor_float = float(valor_str)
+            if valor_float <= 0:
+                flash("O valor da recarga deve ser um número positivo.", "erro")
+                return render_template("recarga.html", payment_pix_copy_paste=None, qr_code_base64=None)
+        except ValueError:
+            flash("Formato de valor inválido. Use números (ex: 10.50).", "erro")
+            return render_template("recarga.html", payment_pix_copy_paste=None, qr_code_base64=None)
+
+        try:
+            sdk = mercadopago.SDK("APP_USR-3329527149542458-052717-28bb56f1a72c5d1af29f34065c847d48-283383607")
+            payment_data = {
+                "transaction_amount": valor_float,
+                "description": descricao,
+                "payment_method_id": "pix",
+                "payer": {
+                    # IMPORTANTE: Para testes, use um e-mail de teste válido do Mercado Pago.
+                    # Ex: test_user_xxxxxxxx@testuser.com (substitua xxxxxxxx por números)
+                    # Verifique a documentação do Mercado Pago sobre "Usuários de Teste".
+                    "email": "test_user_12345678@testuser.com", 
+                    "first_name": "Aluno",
+                    "last_name": "Sistema"
+                    # Considere adicionar CPF/CNPJ para pagamentos reais ou testes mais completos:
+                    # "identification": {
+                    # "type": "CPF",
+                    # "number": "DOCUMENTO_VALIDO_AQUI" # Use um gerador de CPF para testes
+                    # },
+                }
+                # "notification_url": url_for('webhook_mercado_pago', _external=True), # Essencial para produção
+            }
+
+            # 2. Criação do pagamento e verificação da resposta
+            payment_response = sdk.payment().create(payment_data)
+            
+            # --- DEBUG DETALHADO ---
+            print("----------------------------------------------------")
+            print(f"[DEBUG MP Resposta Completa]: {payment_response}")
+            # --- FIM DEBUG DETALHADO ---
+
+            # Verifica se a chamada à API foi bem-sucedida (status HTTP 200 ou 201)
+            if payment_response and payment_response.get("status") in [200, 201]:
+                payment = payment_response.get("response")
+                if payment:
+                    payment_id = payment.get("id") # Bom para referência futura
+                    print(f"[DEBUG MP Objeto Payment]: {payment}")
+                    print(f"[DEBUG MP Status Pagamento]: {payment.get('status')}")
+                    print(f"[DEBUG MP Status Detalhe]: {payment.get('status_detail')}")
+
+                    point_of_interaction = payment.get("point_of_interaction")
+                    if point_of_interaction and isinstance(point_of_interaction, dict):
+                        transaction_data = point_of_interaction.get("transaction_data")
+                        if transaction_data and isinstance(transaction_data, dict):
+                            qr_code_base64 = transaction_data.get("qr_code_base64")
+                            payment_pix_copy_paste = transaction_data.get("qr_code") # Este é o "Copia e Cola"
+
+                            if qr_code_base64 and payment_pix_copy_paste:
+                                flash("Pagamento Pix gerado com sucesso!", "sucesso")
+                            else:
+                                flash("Resposta da API recebida, mas dados do QR Code ou Pix Copia e Cola estão ausentes.", "erro")
+                                print(f"[ERRO PIX INTERNO]: QR Code ou Copia e Cola ausentes. Transaction Data: {transaction_data}")
+                        else:
+                            flash("Erro ao processar dados da transação Pix na resposta da API.", "erro")
+                            print(f"[ERRO PIX INTERNO]: 'transaction_data' não encontrado ou inválido em 'point_of_interaction'. POI: {point_of_interaction}")
+                    else:
+                        flash("Erro ao processar ponto de interação Pix na resposta da API.", "erro")
+                        print(f"[ERRO PIX INTERNO]: 'point_of_interaction' não encontrado ou inválido. Payment: {payment}")
+                else:
+                    flash("Resposta da API bem-sucedida, mas sem conteúdo de pagamento ('response' ausente).", "erro")
+                    print(f"[ERRO PIX INTERNO]: Chave 'response' ausente na resposta da API: {payment_response}")
+            else:
+                # A API retornou um erro ou status inesperado
+                error_message = "Erro ao criar pagamento Pix junto ao Mercado Pago."
+                if payment_response and payment_response.get("response") and payment_response["response"].get("message"):
+                    error_message = payment_response["response"]["message"]
+                elif payment_response and payment_response.get("message"):
+                    error_message = payment_response.get("message")
+                
+                flash(f"Erro da API do Mercado Pago: {error_message}", "erro")
+                print(f"[ERRO API MP]: {error_message} - Resposta Completa: {payment_response}")
+
+        except mercadopago.exceptions.MPException as mp_error:
+            flash(f"Erro na comunicação com o Mercado Pago: {mp_error}", "erro")
+            print(f"[ERRO SDK MPException]: {mp_error}")
+        except Exception as e:
+            flash("Ocorreu um erro inesperado ao gerar o pagamento Pix. Tente novamente.", "erro")
+            print(f"[ERRO PIX GERAL]: {e}")
+            # Em desenvolvimento, pode ser útil relançar o erro para ver o traceback completo:
+            # raise e 
+
+    # Passa as variáveis para o template em todos os casos
+    return render_template("recarga.html", 
+                           payment_link=payment_pix_copy_paste, # Renomeado para clareza, este é o "Copia e Cola"
+                           qr_code_base64=qr_code_base64)
 @app.route('/logout')
 def logout():
     session.clear()
@@ -314,6 +425,7 @@ def logout():
 
 def handler(request, context=None):
     return app(request.environ, start_response=context)
+
 
 if __name__ == "__main__":
     from os import getenv

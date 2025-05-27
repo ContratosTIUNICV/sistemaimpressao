@@ -881,17 +881,16 @@ tbody tr:hover {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background-color: var(--secondary-action-color);
+    background-color: red;
     color: white;
     padding: 10px 18px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 500;
     font-size: 0.95em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: transform 0.2s ease;
 }
 .admin-nav-button:hover {
-    background-color: var(--secondary-action-dark);
     transform: translateY(-2px);
 }
 .admin-nav-button .icone-botao {
