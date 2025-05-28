@@ -47,14 +47,14 @@ def admin_required():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        cpf_input = request.form.get('cpf')
+        ra_input = request.form.get('ra')
         senha_input = request.form.get('senha')
 
-        if not cpf_input or not senha_input:
-            flash('CPF e senha são obrigatórios.', 'erro')
+        if not ra_input or not senha_input:
+            flash('ra e senha são obrigatórios.', 'erro')
             return render_template('login.html')
 
-        result = supabase.table("usuario").select("cpf, senha, aluno, nome").eq("cpf", cpf_input).limit(1).execute()
+        result = supabase.table("usuario").select("ra, senha, aluno, nome").eq("ra", ra_input).limit(1).execute()
 
         if result.data and len(result.data) == 1:
             usuario = result.data[0]
@@ -70,7 +70,7 @@ def login():
 
             if bcrypt.checkpw(senha_input.encode('utf-8'), senha_hash_bytes):
                 session['logged_in'] = True
-                session['usuario'] = cpf_input
+                session['usuario'] = ra_input
                 session['is_aluno'] = is_aluno
                 if is_aluno:
                     return redirect(url_for('inicio'))
@@ -85,34 +85,36 @@ def login():
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
-    cpf_usuario = session.get('usuario')
+    ra_usuario = session.get('usuario')
     if request.method == 'POST':
-        cpf = request.form.get('cpf')
+        ra = request.form.get('ra')
+        email= request.form.get('email')
         senha = request.form.get('senha')
         nome = request.form.get('nome')
         is_aluno = True 
 
-        if not cpf or not senha or not nome:
-            flash('Todos os campos (CPF, Senha, Nome) são obrigatórios.', 'erro')
+        if not ra or not senha or not nome:
+            flash('Todos os campos (ra, Senha, Nome) são obrigatórios.', 'erro')
             return render_template('cadastro.html')
 
         try:
-            existing_user = supabase.table("usuario").select("cpf").eq("cpf", cpf).limit(1).execute()
+            existing_user = supabase.table("usuario").select("ra").eq("ra", ra).limit(1).execute()
             if existing_user.data:
-                flash(f'O CPF {cpf} já está cadastrado.', 'erro')
+                flash(f'O ra {ra} já está cadastrado.', 'erro')
                 return render_template('cadastro.html')
 
             senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
             supabase.table("usuario").insert({
-               "cpf": cpf,
+               "ra": ra,
                "senha": senha_hash,
                "nome": nome,
+               "email": email,
                "saldo": 0,
                "aluno": is_aluno
             }).execute()
             flash(f'Seja bem-vindo, {nome}!', 'sucesso') 
-            return redirect(url_for('login')) 
+            return redirect(url_for('inicio')) 
         except Exception as e:
             print(f"ERRO: {e}")
             flash('Ocorreu um erro ao cadastrar. Tente novamente.', 'erro')
@@ -130,15 +132,15 @@ def home():
 @app.route('/inicio')
 @login_required()
 def inicio():
-    cpf_usuario = session.get('usuario')
-    if not cpf_usuario:
+    ra_usuario = session.get('usuario')
+    if not ra_usuario:
         session.clear()
         return redirect(url_for('login'))
 
     try:
         result = supabase.table("usuario") \
-                         .select("nome, cpf, saldo") \
-                         .eq("cpf", cpf_usuario) \
+                         .select("nome, ra, saldo") \
+                         .eq("ra", ra_usuario) \
                          .limit(1) \
                          .execute()
 
@@ -172,7 +174,7 @@ def admin_dashboard():
 def consulta_aluno():
     alunos = []
     try:
-        result = supabase.table("usuario").select("cpf, nome, saldo").eq("aluno", True).order("nome").execute()
+        result = supabase.table("usuario").select("ra, nome, saldo").eq("aluno", True).order("nome").execute()
         if result.data:
             alunos = result.data
             for aluno in alunos:
@@ -190,18 +192,18 @@ def debitar_aluno():
 
     if request.method == 'POST':
         action = request.form.get('action')
-        cpf_aluno = request.form.get('cpf_aluno')
+        ra_aluno = request.form.get('ra_aluno')
         valor = request.form.get('valor')
 
-        if not cpf_aluno:
-            error_message = 'CPF do aluno é obrigatório.'
+        if not ra_aluno:
+            error_message = 'ra do aluno é obrigatório.'
             return render_template('debitar_aluno.html', error_message=error_message)
         
         try:
-            result = supabase.table("usuario").select("cpf, nome, saldo, aluno").eq("cpf", cpf_aluno).eq("aluno", True).limit(1).execute()
+            result = supabase.table("usuario").select("ra, nome, saldo, aluno").eq("ra", ra_aluno).eq("aluno", True).limit(1).execute()
 
             if not result.data or len(result.data) == 0:
-                error_message = 'Aluno não encontrado ou CPF não corresponde a um aluno.'
+                error_message = 'Aluno não encontrado ou ra não corresponde a um aluno.'
                 return render_template('debitar_aluno.html', error_message=error_message)
             
             aluno_info = result.data[0]
@@ -221,7 +223,7 @@ def debitar_aluno():
                             error_message = 'Saldo insuficiente.'
                         else:
                             novo_saldo = aluno_info['saldo'] - valor_debito
-                            supabase.table("usuario").update({"saldo": novo_saldo}).eq("cpf", cpf_aluno).execute()
+                            supabase.table("usuario").update({"saldo": novo_saldo}).eq("ra", ra_aluno).execute()
                             success_message = f'Débito de R$ {valor_debito:.2f} realizado para {aluno_info["nome"]}. Novo saldo: R$ {novo_saldo:.2f}'
                             aluno_info['saldo'] = novo_saldo
                             aluno_info['saldo_formatado'] = f"R$ {novo_saldo:.2f}".replace('.', ',')
@@ -239,14 +241,14 @@ def debitar_aluno():
 @app.route('/perfil/editar', methods=['GET', 'POST'], endpoint='editar_perfil')
 @login_required()
 def editar_perfil():
-    cpf_usuario_logado = session.get('usuario')
-    if not cpf_usuario_logado:
+    ra_usuario_logado = session.get('usuario')
+    if not ra_usuario_logado:
         flash('Erro: Sessão inválida. Faça login novamente.', 'error')
         return redirect(url_for('login'))
 
     # Buscar dados atuais do usuário para GET e para verificar o nome atual no POST
     try:
-        result = supabase.table("usuario").select("nome, cpf").eq("cpf", cpf_usuario_logado).limit(1).execute()
+        result = supabase.table("usuario").select("nome, ra").eq("ra", ra_usuario_logado).limit(1).execute()
         if not result.data:
             flash('Usuário não encontrado.', 'error')
             return redirect(url_for('inicio'))
@@ -293,9 +295,9 @@ def editar_perfil():
 
         if houve_alteracao and dados_para_atualizar:
             try:
-                supabase.table("usuario").update(dados_para_atualizar).eq("cpf", cpf_usuario_logado).execute()
+                supabase.table("usuario").update(dados_para_atualizar).eq("ra", ra_usuario_logado).execute()
                 flash('Perfil atualizado com sucesso!', 'success')
-                # Se o nome foi alterado e você armazena o nome na sessão (além do CPF), atualize-o aqui.
+                # Se o nome foi alterado e você armazena o nome na sessão (além do ra), atualize-o aqui.
                 # Ex: if 'nome' in dados_para_atualizar: session['usuario_nome'] = dados_para_atualizar['nome']
             except Exception as e:
                 print(f"ERROR - Editar Perfil (Supabase Update): {e}")
@@ -347,10 +349,10 @@ def recarga():
                     "email": "test_user_12345678@testuser.com", 
                     "first_name": "Aluno",
                     "last_name": "Sistema"
-                    # Considere adicionar CPF/CNPJ para pagamentos reais ou testes mais completos:
+                    # Considere adicionar ra/CNPJ para pagamentos reais ou testes mais completos:
                     # "identification": {
-                    # "type": "CPF",
-                    # "number": "DOCUMENTO_VALIDO_AQUI" # Use um gerador de CPF para testes
+                    # "type": "ra",
+                    # "number": "DOCUMENTO_VALIDO_AQUI" # Use um gerador de ra para testes
                     # },
                 }
                 # "notification_url": url_for('webhook_mercado_pago', _external=True), # Essencial para produção
@@ -418,6 +420,7 @@ def recarga():
     return render_template("recarga.html", 
                            payment_link=payment_pix_copy_paste, # Renomeado para clareza, este é o "Copia e Cola"
                            qr_code_base64=qr_code_base64)
+
 @app.route('/logout')
 def logout():
     session.clear()
