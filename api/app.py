@@ -6,8 +6,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from flask import send_from_directory
 import bcrypt
-import mercadopago
-sdk = mercadopago.SDK("APP_USR-3329527149542458-052717-28bb56f1a72c5d1af29f34065c847d48-283383607")
+
 app = Flask(__name__)
 
 app.secret_key = 'sua_chave_secreta' 
@@ -36,10 +35,9 @@ def admin_required():
         def decorated_function(*args, **kwargs):
             if not session.get('logged_in'):
                 return redirect(url_for('login'))
-            
-            if session.get('is_aluno') == True:
-                return redirect(url_for('inicio')) 
-            
+            # A lógica aqui considera que se 'is_membro' for Falso, o usuário é um admin.
+            if session.get('is_membro') == True:
+                return redirect(url_for('inicio'))
             return f(*args, **kwargs)
         return decorated_function
     return wrapper
@@ -47,19 +45,21 @@ def admin_required():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        ra_input = request.form.get('ra')
+        codigo_membro_input = request.form.get('codigo_membro')
         senha_input = request.form.get('senha')
 
-        if not ra_input or not senha_input:
-            flash('ra e senha são obrigatórios.', 'erro')
+        if not codigo_membro_input or not senha_input:
+            flash('Código de membro e senha são obrigatórios.', 'erro')
             return render_template('login.html')
 
-        result = supabase.table("usuario").select("ra, senha, aluno, nome").eq("ra", ra_input).limit(1).execute()
+        # Busca pelo novo campo 'codigo_membro' e pelo campo 'membro'
+        result = supabase.table("usuario").select("id, codigo_membro, senha, membro, nome").eq("codigo_membro", codigo_membro_input).limit(1).execute()
 
         if result.data and len(result.data) == 1:
             usuario = result.data[0]
             stored_senha_hash_str = usuario['senha']
-            is_aluno = usuario.get('aluno', True)
+            # O campo 'membro' (booleano) define se é um membro comum ou admin
+            is_membro = usuario.get('membro', True)
             nome = usuario.get('nome', 'usuário')
 
             try:
@@ -70,9 +70,10 @@ def login():
 
             if bcrypt.checkpw(senha_input.encode('utf-8'), senha_hash_bytes):
                 session['logged_in'] = True
-                session['usuario'] = ra_input
-                session['is_aluno'] = is_aluno
-                if is_aluno:
+                session['usuario_id'] = usuario['id'] # Armazena o ID principal
+                session['usuario_codigo'] = codigo_membro_input # Mantém o código para exibição/uso
+                session['is_membro'] = is_membro
+                if is_membro:
                     return redirect(url_for('inicio'))
                 else:
                     return redirect(url_for('admin_dashboard'))
@@ -85,36 +86,35 @@ def login():
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
-    ra_usuario = session.get('usuario')
     if request.method == 'POST':
-        ra = request.form.get('ra')
-        email= request.form.get('email')
+        codigo_membro = request.form.get('codigo_membro')
+        email = request.form.get('email')
         senha = request.form.get('senha')
         nome = request.form.get('nome')
-        is_aluno = True 
+        is_membro = True  # Novos cadastros são sempre de membros comuns
 
-        if not ra or not senha or not nome:
-            flash('Todos os campos (ra, Senha, Nome) são obrigatórios.', 'erro')
+        if not codigo_membro or not senha or not nome:
+            flash('Todos os campos (Código de Membro, Senha, Nome) são obrigatórios.', 'erro')
             return render_template('cadastro.html')
 
         try:
-            existing_user = supabase.table("usuario").select("ra").eq("ra", ra).limit(1).execute()
+            existing_user = supabase.table("usuario").select("codigo_membro").eq("codigo_membro", codigo_membro).limit(1).execute()
             if existing_user.data:
-                flash(f'O ra {ra} já está cadastrado.', 'erro')
+                flash(f'O código {codigo_membro} já está cadastrado.', 'erro')
                 return render_template('cadastro.html')
 
             senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
+            # Insere usando os novos nomes de coluna. Removido o campo "saldo".
             supabase.table("usuario").insert({
-               "ra": ra,
-               "senha": senha_hash,
-               "nome": nome,
-               "email": email,
-               "saldo": 0,
-               "aluno": is_aluno
+                "codigo_membro": codigo_membro,
+                "senha": senha_hash,
+                "nome": nome,
+                "email": email,
+                "membro": is_membro
             }).execute()
-            flash(f'Seja bem-vindo, {nome}!', 'sucesso') 
-            return redirect(url_for('inicio')) 
+            flash(f'Seja bem-vindo, {nome}!', 'sucesso')
+            return redirect(url_for('login')) # Redireciona para o login após o cadastro
         except Exception as e:
             print(f"ERRO: {e}")
             flash('Ocorreu um erro ao cadastrar. Tente novamente.', 'erro')
@@ -123,7 +123,7 @@ def cadastro():
 @app.route('/')
 def home():
     if session.get('logged_in'):
-        if session.get('is_aluno') == False:
+        if session.get('is_membro') == False:
             return redirect(url_for('admin_dashboard'))
         else:
             return redirect(url_for('inicio'))
@@ -132,305 +132,190 @@ def home():
 @app.route('/inicio')
 @login_required()
 def inicio():
-    ra_usuario = session.get('usuario')
-    if not ra_usuario:
+    codigo_membro_usuario = session.get('usuario_codigo')
+    if not codigo_membro_usuario:
         session.clear()
         return redirect(url_for('login'))
 
+    usuario_data = None
+    eventos = []
+    
     try:
-        result = supabase.table("usuario") \
-                         .select("nome, ra, saldo") \
-                         .eq("ra", ra_usuario) \
-                         .limit(1) \
-                         .execute()
-
-        if result.data and len(result.data) == 1:
-            usuario_data = result.data[0]
-            usuario_data['saldo_formatado'] = f"R$ {usuario_data['saldo']:.2f}".replace('.', ',')
+        # Busca dados do usuário (sem o saldo)
+        result_usuario = supabase.table("usuario").select("nome, codigo_membro").eq("codigo_membro", codigo_membro_usuario).limit(1).execute()
+        if result_usuario.data and len(result_usuario.data) == 1:
+            usuario_data = result_usuario.data[0]
         else:
             session.clear()
             return redirect(url_for('login'))
 
-    except Exception as e:
-        print(f"ERROR - Inicio: Erro ao buscar dados do usuário: {e}")
-        session.clear()
-        return redirect(url_for('login'))
+        # Busca eventos futuros
+        hoje = datetime.datetime.now().isoformat()
+        result_eventos = supabase.table("eventos").select("*").gte("data_evento", hoje).order("data_evento", desc=False).execute()
+        if result_eventos.data:
+            eventos = result_eventos.data
 
-    # Verifica se o usuário clicou em "Visualizar Perfil"
-    acao = request.args.get("acao")
-    if acao == "perfil":
-        return render_template("perfil.html", usuario=usuario_data)
-    if acao == "recarga":
-        return render_template("recarga.html", usuario=usuario_data)
-    return render_template('inicio.html', usuario=usuario_data)
+    except Exception as e:
+        print(f"ERROR - Inicio: Erro ao buscar dados: {e}")
+        flash('Erro ao carregar a página inicial.', 'erro')
+
+    return render_template('inicio.html', usuario=usuario_data, eventos=eventos)
 
 @app.route('/admin')
 @admin_required()
 def admin_dashboard():
     return render_template('admin.html')
 
-@app.route('/consultaaluno')
+@app.route('/consultamembros')
 @admin_required()
-def consulta_aluno():
-    alunos = []
+def consulta_membros():
+    membros = []
     try:
-        result = supabase.table("usuario").select("ra, nome, saldo").eq("aluno", True).order("nome").execute()
+  
+        result = supabase.table("usuario").select("codigo_membro, nome").eq("membro", True).order("nome").execute()
         if result.data:
-            alunos = result.data
-            for aluno in alunos:
-                aluno['saldo_formatado'] = f"R$ {aluno['saldo']:.2f}".replace('.', ',')
+            membros = result.data
     except Exception as e:
-        print(f"ERROR - Consulta Aluno: {e}")
-    return render_template('consulta_aluno.html', alunos=alunos)
+        print(f"ERROR - Consulta Membros: {e}")
+    return render_template('consulta_aluno.html', alunos=membros) # 
 
-@app.route('/debitaraluno', methods=['GET', 'POST'])
+
+@app.route('/eventos/criar', methods=['GET', 'POST'])
 @admin_required()
-def debitar_aluno():
-    error_message = None
-    success_message = None
-    aluno_info = None
+def criar_evento():
+    if request.method == 'POST':
+        nome_evento = request.form.get('nome_evento')
+        data_evento = request.form.get('data_evento')
+        descricao = request.form.get('descricao')
+        local = request.form.get('local')
+
+        if not nome_evento or not data_evento or not local:
+            flash('Nome, data e local do evento são obrigatórios.', 'erro')
+            return render_template('criarevento.html')
+
+        try:
+            supabase.table("eventos").insert({
+                "nome_evento": nome_evento,
+                "data_evento": data_evento,
+                "descricao": descricao,
+                "local": local
+            }).execute()
+            flash('Evento criado com sucesso!', 'sucesso')
+            return redirect(url_for('admin_dashboard'))
+        except Exception as e:
+            print(f"ERRO ao criar evento: {e}")
+            flash('Ocorreu um erro ao criar o evento.', 'erro')
+
+    return render_template('criarevento.html')
+
+@app.route('/eventos/<int:id_evento>/presenca', methods=['GET', 'POST'])
+@admin_required()
+def presenca_evento(id_evento):
+    try:
+        evento = supabase.table("eventos").select("*").eq("id", id_evento).single().execute().data
+        if not evento:
+            flash("Evento não encontrado.", "erro")
+            return redirect(url_for('admin_dashboard'))
+    except Exception as e:
+        flash(f"Erro ao buscar evento: {e}", "erro")
+        return redirect(url_for('admin_dashboard'))
 
     if request.method == 'POST':
-        action = request.form.get('action')
-        ra_aluno = request.form.get('ra_aluno')
-        valor = request.form.get('valor')
+        codigo_membro = request.form.get('codigo_membro')
 
-        if not ra_aluno:
-            error_message = 'ra do aluno é obrigatório.'
-            return render_template('debitar_aluno.html', error_message=error_message)
-        
         try:
-            result = supabase.table("usuario").select("ra, nome, saldo, aluno").eq("ra", ra_aluno).eq("aluno", True).limit(1).execute()
+            membro = supabase.table("usuario").select("id, nome").eq("codigo_membro", codigo_membro).single().execute().data
+            if not membro:
+                flash(f'Membro com código {codigo_membro} não encontrado.', 'erro')
+                return render_template('presencaevento.html', evento=evento)
 
-            if not result.data or len(result.data) == 0:
-                error_message = 'Aluno não encontrado ou ra não corresponde a um aluno.'
-                return render_template('debitar_aluno.html', error_message=error_message)
-            
-            aluno_info = result.data[0]
-            aluno_info['saldo_formatado'] = f"R$ {aluno_info['saldo']:.2f}".replace('.', ',')
-
-            if action == 'buscar':
-                pass
-            elif action == 'debitar':
-                if not valor:
-                    error_message = 'Valor para débito é obrigatório.'
-                else:
-                    try:
-                        valor_debito = float(valor)
-                        if valor_debito <= 0:
-                            error_message = 'O valor deve ser positivo.'
-                        elif aluno_info['saldo'] < valor_debito:
-                            error_message = 'Saldo insuficiente.'
-                        else:
-                            novo_saldo = aluno_info['saldo'] - valor_debito
-                            supabase.table("usuario").update({"saldo": novo_saldo}).eq("ra", ra_aluno).execute()
-                            success_message = f'Débito de R$ {valor_debito:.2f} realizado para {aluno_info["nome"]}. Novo saldo: R$ {novo_saldo:.2f}'
-                            aluno_info['saldo'] = novo_saldo
-                            aluno_info['saldo_formatado'] = f"R$ {novo_saldo:.2f}".replace('.', ',')
-                    except ValueError:
-                        error_message = 'Valor inválido. Use um número.'
+            ja_registrado = supabase.table("presencas").select("id").eq("id_evento", id_evento).eq("id_usuario", membro['id']).execute().data
+            if ja_registrado:
+                flash(f'{membro["nome"]} já teve sua presença registrada neste evento.', 'info')
             else:
-                error_message = 'Ação inválida.'
-
+                supabase.table("presencas").insert({
+                    "id_evento": id_evento,
+                    "id_usuario": membro['id']
+                }).execute()
+                flash(f'Presença de {membro["nome"]} registrada com sucesso!', 'sucesso')
+        
         except Exception as e:
-            print(f"ERROR - Debitar Aluno: {e}")
-            error_message = 'Ocorreu um erro. Tente novamente.'
+            print(f"ERRO ao registrar presença: {e}")
+            flash('Ocorreu um erro ao registrar a presença.', 'erro')
 
-    return render_template('debitar_aluno.html', error_message=error_message, success_message=success_message, aluno_info=aluno_info)
+    return render_template('presencaevento.html', evento=evento)
+
+#
+# --- FIM DAS NOVAS ROTAS DE EVENTOS ---
+#
 
 @app.route('/perfil/editar', methods=['GET', 'POST'], endpoint='editar_perfil')
 @login_required()
 def editar_perfil():
-    ra_usuario_logado = session.get('usuario')
-    if not ra_usuario_logado:
+    codigo_membro_logado = session.get('usuario_codigo')
+    if not codigo_membro_logado:
         flash('Erro: Sessão inválida. Faça login novamente.', 'error')
         return redirect(url_for('login'))
 
-    # Buscar dados atuais do usuário para GET e para verificar o nome atual no POST
     try:
-        result = supabase.table("usuario").select("nome, ra").eq("ra", ra_usuario_logado).limit(1).execute()
+        result = supabase.table("usuario").select("nome, codigo_membro").eq("codigo_membro", codigo_membro_logado).limit(1).execute()
         if not result.data:
             flash('Usuário não encontrado.', 'error')
             return redirect(url_for('inicio'))
         usuario_atual = result.data[0]
     except Exception as e:
         print(f"ERROR - Editar Perfil (GET user data): {e}")
-        flash('Erro ao carregar dados do perfil. Tente novamente.', 'error')
-        return redirect(url_for('inicio', acao='perfil')) # Redireciona para a visualização do perfil
+        flash('Erro ao carregar dados do perfil.', 'error')
+        return redirect(url_for('inicio'))
 
     if request.method == 'POST':
         novo_nome = request.form.get('nome')
         nova_senha = request.form.get('nova_senha')
         confirmar_nova_senha = request.form.get('confirmar_nova_senha')
-
         dados_para_atualizar = {}
         houve_alteracao = False
 
-        # Validar e atualizar nome
-        if novo_nome and novo_nome.strip() == "":
-            flash('O nome não pode ser vazio.', 'error')
-            return render_template('editar_perfil.html', usuario=usuario_atual)
-        
         if novo_nome and novo_nome != usuario_atual.get('nome'):
             dados_para_atualizar['nome'] = novo_nome
             houve_alteracao = True
 
-        # Validar e atualizar senha
-        if nova_senha: # Usuário quer mudar a senha
-            if len(nova_senha) < 4: # Exemplo de validação mínima
-                 flash('A nova senha deve ter pelo menos 4 caracteres.', 'error')
-                 return render_template('editar_perfil.html', usuario=usuario_atual)
+        if nova_senha:
+            if len(nova_senha) < 4:
+                flash('A nova senha deve ter pelo menos 4 caracteres.', 'error')
+                return render_template('editar_perfil.html', usuario=usuario_atual)
             if nova_senha != confirmar_nova_senha:
                 flash('As senhas não coincidem.', 'error')
                 return render_template('editar_perfil.html', usuario=usuario_atual)
             
-            try:
-                senha_hash = bcrypt.hashpw(nova_senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                dados_para_atualizar['senha'] = senha_hash
-                houve_alteracao = True
-            except Exception as e:
-                print(f"ERROR - Editar Perfil (Password Hash): {e}")
-                flash('Erro ao processar nova senha.', 'error')
-                return render_template('editar_perfil.html', usuario=usuario_atual)
+            senha_hash = bcrypt.hashpw(nova_senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            dados_para_atualizar['senha'] = senha_hash
+            houve_alteracao = True
 
-        if houve_alteracao and dados_para_atualizar:
+        if houve_alteracao:
             try:
-                supabase.table("usuario").update(dados_para_atualizar).eq("ra", ra_usuario_logado).execute()
+                supabase.table("usuario").update(dados_para_atualizar).eq("codigo_membro", codigo_membro_logado).execute()
                 flash('Perfil atualizado com sucesso!', 'success')
-                # Se o nome foi alterado e você armazena o nome na sessão (além do ra), atualize-o aqui.
-                # Ex: if 'nome' in dados_para_atualizar: session['usuario_nome'] = dados_para_atualizar['nome']
             except Exception as e:
                 print(f"ERROR - Editar Perfil (Supabase Update): {e}")
-                flash('Erro ao atualizar o perfil no banco de dados. Tente novamente.', 'error')
-                return render_template('editar_perfil.html', usuario=usuario_atual) # Permite tentar novamente
-        elif not houve_alteracao:
-             flash('Nenhuma alteração foi detectada.', 'info')
-
-
-        return redirect(url_for('inicio', acao='perfil')) # Redireciona para a visualização do perfil
-
-    # Para requisições GET
-    return render_template('editar_perfil.html', usuario=usuario_atual)
-
-@app.route('/recarga', methods=['GET', 'POST'])
-def recarga():
-    payment_pix_copy_paste = None  # Renomeado para clareza
-    qr_code_base64 = None
-    payment_id = None # Útil para registrar ou verificar status depois
-
-    if request.method == 'POST':
-        valor_str = request.form.get('valor')
-        descricao = request.form.get('descricao') or "Recarga via Pix"
-
-        # 1. Validação do valor
-        if not valor_str:
-            flash("O valor da recarga é obrigatório.", "erro")
-            return render_template("recarga.html", payment_pix_copy_paste=None, qr_code_base64=None)
+                flash('Erro ao atualizar o perfil no banco de dados.', 'error')
+        else:
+            flash('Nenhuma alteração foi detectada.', 'info')
         
-        try:
-            valor_float = float(valor_str)
-            if valor_float <= 0:
-                flash("O valor da recarga deve ser um número positivo.", "erro")
-                return render_template("recarga.html", payment_pix_copy_paste=None, qr_code_base64=None)
-        except ValueError:
-            flash("Formato de valor inválido. Use números (ex: 10.50).", "erro")
-            return render_template("recarga.html", payment_pix_copy_paste=None, qr_code_base64=None)
+        return redirect(url_for('inicio'))
 
-        try:
-            sdk = mercadopago.SDK("APP_USR-3329527149542458-052717-28bb56f1a72c5d1af29f34065c847d48-283383607")
-            payment_data = {
-                "transaction_amount": valor_float,
-                "description": descricao,
-                "payment_method_id": "pix",
-                "payer": {
-                    # IMPORTANTE: Para testes, use um e-mail de teste válido do Mercado Pago.
-                    # Ex: test_user_xxxxxxxx@testuser.com (substitua xxxxxxxx por números)
-                    # Verifique a documentação do Mercado Pago sobre "Usuários de Teste".
-                    "email": "test_user_12345678@testuser.com", 
-                    "first_name": "Aluno",
-                    "last_name": "Sistema"
-                    # Considere adicionar ra/CNPJ para pagamentos reais ou testes mais completos:
-                    # "identification": {
-                    # "type": "ra",
-                    # "number": "DOCUMENTO_VALIDO_AQUI" # Use um gerador de ra para testes
-                    # },
-                }
-                # "notification_url": url_for('webhook_mercado_pago', _external=True), # Essencial para produção
-            }
-
-            # 2. Criação do pagamento e verificação da resposta
-            payment_response = sdk.payment().create(payment_data)
-            
-            # --- DEBUG DETALHADO ---
-            print("----------------------------------------------------")
-            print(f"[DEBUG MP Resposta Completa]: {payment_response}")
-            # --- FIM DEBUG DETALHADO ---
-
-            # Verifica se a chamada à API foi bem-sucedida (status HTTP 200 ou 201)
-            if payment_response and payment_response.get("status") in [200, 201]:
-                payment = payment_response.get("response")
-                if payment:
-                    payment_id = payment.get("id") # Bom para referência futura
-                    print(f"[DEBUG MP Objeto Payment]: {payment}")
-                    print(f"[DEBUG MP Status Pagamento]: {payment.get('status')}")
-                    print(f"[DEBUG MP Status Detalhe]: {payment.get('status_detail')}")
-
-                    point_of_interaction = payment.get("point_of_interaction")
-                    if point_of_interaction and isinstance(point_of_interaction, dict):
-                        transaction_data = point_of_interaction.get("transaction_data")
-                        if transaction_data and isinstance(transaction_data, dict):
-                            qr_code_base64 = transaction_data.get("qr_code_base64")
-                            payment_pix_copy_paste = transaction_data.get("qr_code") # Este é o "Copia e Cola"
-
-                            if qr_code_base64 and payment_pix_copy_paste:
-                                flash("Pagamento Pix gerado com sucesso!", "sucesso")
-                            else:
-                                flash("Resposta da API recebida, mas dados do QR Code ou Pix Copia e Cola estão ausentes.", "erro")
-                                print(f"[ERRO PIX INTERNO]: QR Code ou Copia e Cola ausentes. Transaction Data: {transaction_data}")
-                        else:
-                            flash("Erro ao processar dados da transação Pix na resposta da API.", "erro")
-                            print(f"[ERRO PIX INTERNO]: 'transaction_data' não encontrado ou inválido em 'point_of_interaction'. POI: {point_of_interaction}")
-                    else:
-                        flash("Erro ao processar ponto de interação Pix na resposta da API.", "erro")
-                        print(f"[ERRO PIX INTERNO]: 'point_of_interaction' não encontrado ou inválido. Payment: {payment}")
-                else:
-                    flash("Resposta da API bem-sucedida, mas sem conteúdo de pagamento ('response' ausente).", "erro")
-                    print(f"[ERRO PIX INTERNO]: Chave 'response' ausente na resposta da API: {payment_response}")
-            else:
-                # A API retornou um erro ou status inesperado
-                error_message = "Erro ao criar pagamento Pix junto ao Mercado Pago."
-                if payment_response and payment_response.get("response") and payment_response["response"].get("message"):
-                    error_message = payment_response["response"]["message"]
-                elif payment_response and payment_response.get("message"):
-                    error_message = payment_response.get("message")
-                
-                flash(f"Erro da API do Mercado Pago: {error_message}", "erro")
-                print(f"[ERRO API MP]: {error_message} - Resposta Completa: {payment_response}")
-
-        except mercadopago.exceptions.MPException as mp_error:
-            flash(f"Erro na comunicação com o Mercado Pago: {mp_error}", "erro")
-            print(f"[ERRO SDK MPException]: {mp_error}")
-        except Exception as e:
-            flash("Ocorreu um erro inesperado ao gerar o pagamento Pix. Tente novamente.", "erro")
-            print(f"[ERRO PIX GERAL]: {e}")
-            # Em desenvolvimento, pode ser útil relançar o erro para ver o traceback completo:
-            # raise e 
-
-    # Passa as variáveis para o template em todos os casos
-    return render_template("recarga.html", 
-                           payment_link=payment_pix_copy_paste, # Renomeado para clareza, este é o "Copia e Cola"
-                           qr_code_base64=qr_code_base64)
+    return render_template('editar_perfil.html', usuario=usuario_atual)
 
 @app.route('/logout')
 def logout():
     session.clear()
+    flash('Você saiu da sua conta.', 'sucesso')
     return redirect(url_for('login'))
 
+# Função para Vercel (se estiver usando)
 def handler(request, context=None):
     return app(request.environ, start_response=context)
-
 
 if __name__ == "__main__":
     from os import getenv
     port = int(getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
