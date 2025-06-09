@@ -27,8 +27,8 @@
         <h1>Login</h1>
         <form method="POST" action="{{ url_for('login') }}">
             <div class="login-form-group">
-                <label for="ra_email" class="login-label">RA:</label>
-                <input type="text" name="ra" class="login-input" placeholder="Digite seu RA" required value="{{ request.form.ra if request.form else '' }}">
+                <label for="cpf_email" class="login-label">CPF:</label>
+                <input type="text" name="cpf" class="login-input" placeholder="Digite seu CPF" required value="{{ request.form.cpf if request.form else '' }}">
             </div>
             <div class="login-form-group">
                 <label for="senha" class="login-label">Senha:</label>
